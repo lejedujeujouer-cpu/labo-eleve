@@ -1,0 +1,66 @@
+/* Ruban façon logiciels de bureautique (onglets, groupes, grands et petits boutons).
+   Commun au Tableur et au Traitement de texte, pour que les élèves retrouvent leurs repères. */
+.office { --appli: #1e7145; --appli-clair: color-mix(in srgb, var(--appli) 12%, var(--surface)); height: 100vh; display: flex; flex-direction: column; background: var(--fond); }
+.office.texte { --appli: #2b579a; }
+
+/* Barre de titre : accès rapide + nom du document */
+.barre-titre { display: flex; align-items: center; gap: 4px; height: 38px; padding: 0 10px; background: var(--appli); color: #fff; flex: none; }
+.barre-titre .acces { width: 30px; height: 28px; border: 0; border-radius: 6px; background: transparent; color: #fff; display: grid; place-items: center; cursor: pointer; }
+.barre-titre .acces:hover { background: rgba(255,255,255,.18); }
+.barre-titre .acces svg { width: 17px; height: 17px; }
+.barre-titre .titre-doc { flex: 1; text-align: center; font-size: 13.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.barre-titre .etat-doc { font-size: 12px; opacity: .85; margin-left: 8px; white-space: nowrap; }
+
+/* Onglets du ruban */
+.onglets-ruban { display: flex; align-items: flex-end; gap: 2px; padding: 0 8px; background: var(--surface); border-bottom: 1px solid var(--bord); flex: none; }
+.onglets-ruban button { border: 0; background: transparent; padding: 8px 14px 7px; font-size: 13.5px; color: var(--texte); cursor: pointer; border-bottom: 3px solid transparent; }
+.onglets-ruban button:hover { background: var(--surface-2); }
+.onglets-ruban button.actif { color: var(--appli); font-weight: 650; border-bottom-color: var(--appli); }
+.onglets-ruban button.fichier { background: var(--appli); color: #fff; border-radius: 6px 6px 0 0; margin-right: 6px; border-bottom-color: var(--appli); }
+
+/* Panneaux du ruban */
+.ruban { display: flex; align-items: stretch; gap: 0; padding: 5px 6px 0; min-height: 96px; background: var(--surface); border-bottom: 1px solid var(--bord); box-shadow: 0 1px 3px rgba(0,0,0,.06); flex: none; overflow-x: auto; }
+.ruban[hidden] { display: none !important; }
+.groupe-ruban { display: flex; flex-direction: column; padding: 0 8px; border-right: 1px solid var(--bord); flex: none; }
+.groupe-ruban:last-child { border-right: 0; }
+.groupe-ruban .contenu { display: flex; gap: 3px; align-items: flex-start; flex: 1; }
+.groupe-ruban .colonne { display: flex; flex-direction: column; gap: 3px; }
+.groupe-ruban .ligne { display: flex; gap: 2px; align-items: center; }
+.groupe-ruban .nom-groupe { text-align: center; font-size: 11.5px; color: var(--texte-doux); padding: 3px 0 4px; white-space: nowrap; }
+
+/* Boutons */
+.br { border: 1px solid transparent; background: transparent; color: var(--texte); border-radius: 5px; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; font-size: 12.5px; padding: 3px 5px; min-height: 26px; white-space: nowrap; }
+.br:hover { background: var(--appli-clair); border-color: color-mix(in srgb, var(--appli) 30%, transparent); }
+.br.actif { background: color-mix(in srgb, var(--appli) 20%, var(--surface)); border-color: color-mix(in srgb, var(--appli) 50%, transparent); }
+.br:disabled { opacity: .4; cursor: default; }
+.br svg { width: 17px; height: 17px; flex: none; }
+.br.grand { flex-direction: column; justify-content: flex-start; padding: 4px 6px; min-width: 56px; height: 66px; gap: 3px; text-align: center; white-space: normal; line-height: 1.15; font-size: 12px; }
+.br.grand svg { width: 30px; height: 30px; }
+.br .fleche { font-size: 9px; opacity: .7; }
+.ruban select, .ruban input[type=number] { height: 26px; padding: 0 6px; border-radius: 4px; border: 1px solid var(--bord); background: var(--surface); color: var(--texte); font-size: 12.5px; }
+.couleur-br { position: relative; }
+.couleur-br .barre-couleur { position: absolute; left: 5px; right: 5px; bottom: 2px; height: 4px; border-radius: 1px; }
+.couleur-br input[type=color] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; }
+
+/* Menu déroulant (bordures, graphiques…) et menu contextuel */
+.menu-flottant { position: fixed; z-index: 60; background: var(--surface); border: 1px solid var(--bord); border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,.22); padding: 4px; min-width: 190px; display: flex; flex-direction: column; }
+.menu-flottant[hidden] { display: none !important; }
+.menu-flottant button { border: 0; background: transparent; text-align: left; padding: 7px 10px; border-radius: 5px; font-size: 13px; color: var(--texte); cursor: pointer; display: flex; align-items: center; gap: 8px; }
+.menu-flottant button:hover { background: var(--appli-clair); }
+.menu-flottant button svg { width: 16px; height: 16px; }
+.menu-flottant hr { border: 0; border-top: 1px solid var(--bord); margin: 4px 2px; }
+
+/* Barre d'état */
+.barre-etat-office { display: flex; align-items: center; gap: 14px; height: 26px; padding: 0 12px; background: var(--surface-2); border-top: 1px solid var(--bord); font-size: 12px; color: var(--texte-doux); flex: none; }
+.barre-etat-office .espace { flex: 1; }
+.barre-etat-office input[type=range] { width: 110px; margin: 0; height: 4px; }
+.barre-etat-office .zoom-val { min-width: 38px; text-align: right; }
+
+/* Fenêtres (Fichier, insertion…) */
+.fond-fenetre { position: fixed; inset: 0; z-index: 70; display: grid; place-items: center; background: rgba(10,14,28,.45); }
+.fond-fenetre[hidden] { display: none !important; }
+.fenetre { width: min(560px, 92vw); max-height: 88vh; overflow: auto; background: var(--surface); border: 1px solid var(--bord); border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 24px 60px rgba(0,0,0,.35); }
+.fenetre h2 { font-size: 18px; text-transform: none; letter-spacing: 0; color: var(--texte); margin: 0; }
+.fenetre .deux { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.fenetre .champ span { font-weight: 600; font-size: 13px; }
+.boutons-fenetre { display: flex; justify-content: flex-end; gap: 8px; }

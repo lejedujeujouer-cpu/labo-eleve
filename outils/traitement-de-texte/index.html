@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title>Traitement de texte</title>
+  <link rel="stylesheet" href="../../commun/outil.css">
+  <link rel="stylesheet" href="../../commun/ruban.css">
+  <script src="../../commun/outil.js"></script>
+  <script src="../../commun/document.js"></script>
+  <script src="../../commun/ruban.js"></script>
+  <script src="../../commun/biblio/mammoth.js"></script>
+  <script src="../../commun/biblio/docx.js"></script>
+  <link rel="stylesheet" href="texte.css">
+</head>
+<body>
+  <div class="office texte">
+    <!-- Barre de titre : accès rapide + nom du document -->
+    <header class="barre-titre">
+      <button class="acces" data-ic="enregistrer" data-cmd="enregistrer" title="Enregistrer (Ctrl+S)"></button>
+      <button class="acces" data-ic="annuler" data-cmd="undo" title="Annuler (Ctrl+Z)"></button>
+      <button class="acces" data-ic="retablir" data-cmd="redo" title="Rétablir (Ctrl+Y)"></button>
+      <div class="titre-doc"><span id="nom-fichier">Document1</span> — Traitement de texte<span class="etat-doc" id="etat-fichier"></span></div>
+      <button class="acces aide" data-cmd="raccourcis" title="Raccourcis clavier (F1)">?</button>
+    </header>
+
+    <nav class="onglets-ruban">
+      <button class="fichier" data-onglet="fichier" id="onglet-fichier">Fichier</button>
+      <button data-onglet="accueil" class="actif">Accueil</button>
+      <button data-onglet="insertion">Insertion</button>
+      <button data-onglet="mise-en-page">Mise en page</button>
+      <button data-onglet="affichage">Affichage</button>
+      <button data-onglet="equation" class="contextuel" id="onglet-equation" hidden title="Outils de l'équation où se trouve le curseur">Équation</button>
+    </nav>
+
+    <!-- Accueil -->
+    <section class="ruban" data-panneau="accueil">
+      <div class="groupe-ruban">
+        <div class="contenu">
+          <button class="br grand" data-ic="coller" data-cmd="coller" title="Coller (Ctrl+V)">Coller</button>
+          <div class="colonne">
+            <button class="br" data-ic="couper" data-cmd="cut" title="Couper (Ctrl+X)">Couper</button>
+            <button class="br" data-ic="copier" data-cmd="copy" title="Copier (Ctrl+C)">Copier</button>
+          </div>
+        </div>
+        <div class="nom-groupe">Presse-papiers</div>
+      </div>
+      <div class="groupe-ruban">
+        <div class="contenu colonne">
+          <div class="ligne">
+            <select id="choix-police" title="Police" style="width:150px">
+              <option>Calibri</option><option>Arial</option><option>Cambria</option><option>Times New Roman</option>
+              <option>Verdana</option><option>Georgia</option><option>Comic Sans MS</option><option>Courier New</option>
+            </select>
+            <select id="choix-taille" title="Taille de police (Ctrl+Maj+&gt; agrandir, Ctrl+&lt; réduire)" style="width:58px">
+              <option>8</option><option>9</option><option>10</option><option selected>11</option><option>12</option><option>14</option>
+              <option>16</option><option>18</option><option>20</option><option>24</option><option>28</option><option>36</option><option>48</option><option>72</option>
+            </select>
+            <button class="br" data-ic="effacer" data-cmd="removeFormat" title="Effacer la mise en forme (Ctrl+Espace)"></button>
+          </div>
+          <div class="ligne">
+            <button class="br" data-ic="gras" data-cmd="bold" title="Gras (Ctrl+G)"></button>
+            <button class="br" data-ic="italique" data-cmd="italic" title="Italique (Ctrl+I)"></button>
+            <button class="br" data-ic="souligne" data-cmd="underline" title="Souligné (Ctrl+U)"></button>
+            <button class="br" data-ic="barre" data-cmd="strikeThrough" title="Barré"></button>
+            <button class="br" data-ic="indice" data-cmd="subscript" title="Indice, ex. H₂O (Ctrl+=)"></button>
+            <button class="br" data-ic="exposant" data-cmd="superscript" title="Exposant, ex. m² (Ctrl+Maj++)"></button>
+            <span class="br couleur-br" data-ic="surligner" title="Couleur de surbrillance"><span class="barre-couleur" id="barre-surligner" style="background:#ffff00"></span><input type="color" id="choix-surligner" value="#ffff00"></span>
+            <span class="br couleur-br" data-ic="couleurTexte" title="Couleur de police"><span class="barre-couleur" id="barre-couleur" style="background:#c00000"></span><input type="color" id="choix-couleur" value="#c00000"></span>
+          </div>
+        </div>
+        <div class="nom-groupe">Police</div>
+      </div>
+      <div class="groupe-ruban">
+        <div class="contenu colonne">
+          <div class="ligne">
+            <button class="br" data-ic="puces" data-cmd="insertUnorderedList" title="Puces (Ctrl+Maj+L)"></button>
+            <button class="br" data-ic="numeros" data-cmd="insertOrderedList" title="Numérotation"></button>
+            <button class="br" data-ic="retraitMoins" data-cmd="retrait-" title="Diminuer le retrait (Maj+Tab dans une liste)"></button>
+            <button class="br" data-ic="retraitPlus" data-cmd="retrait+" title="Augmenter le retrait (Tab dans une liste)"></button>
+          </div>
+          <div class="ligne">
+            <button class="br" data-ic="gauche" data-cmd="justifyLeft" title="Aligner à gauche (Ctrl+Maj+G)"></button>
+            <button class="br" data-ic="centre" data-cmd="justifyCenter" title="Centrer (Ctrl+E)"></button>
+            <button class="br" data-ic="droite" data-cmd="justifyRight" title="Aligner à droite (Ctrl+Maj+D)"></button>
+            <button class="br" data-ic="justifie" data-cmd="justifyFull" title="Justifier (Ctrl+J)"></button>
+            <button class="br" data-ic="interligne" data-menu="menu-interligne" title="Interligne (Ctrl+1 simple, Ctrl+5 = 1,5, Ctrl+2 double)"><span class="fleche">▾</span></button>
+          </div>
+        </div>
+        <div class="nom-groupe">Paragraphe</div>
+      </div>
+      <div class="groupe-ruban">
+        <div class="contenu galerie-styles" id="galerie-styles">
+          <button class="style-rapide" data-bloc="p" title="Normal (Ctrl+Maj+N)"><span class="apercu normal">AaBbCc</span>Normal</button>
+          <button class="style-rapide" data-bloc="h1" title="Titre 1 (Ctrl+Alt+1)"><span class="apercu t1">AaBbC</span>Titre 1</button>
+          <button class="style-rapide" data-bloc="h2" title="Titre 2 (Ctrl+Alt+2)"><span class="apercu t2">AaBbCc</span>Titre 2</button>
+          <button class="style-rapide" data-bloc="h3" title="Titre 3 (Ctrl+Alt+3)"><span class="apercu t3">AaBbCc</span>Titre 3</button>
+        </div>
+        <div class="nom-groupe">Styles</div>
+      </div>
+    </section>
+
+    <!-- Insertion -->
+    <section class="ruban" data-panneau="insertion" hidden>
+      <div class="groupe-ruban">
+        <div class="contenu"><button class="br grand" data-ic="saut" data-cmd="saut-page" title="Commencer une nouvelle page (Ctrl+Entrée)">Saut de page</button></div>
+        <div class="nom-groupe">Pages</div>
+      </div>
+      <div class="groupe-ruban">
+        <div class="contenu">
+          <button class="br grand" data-ic="entete" data-cmd="entete" title="Texte en haut de chaque page (nom, classe, date…)">En-tête</button>
+          <button class="br grand" data-ic="pied" data-cmd="pied" title="Texte en bas de chaque page">Pied de page</button>
+          <button class="br grand" data-ic="numero" data-cmd="numero" title="Numéroter les pages">Numéro de page</button>
+        </div>
+        <div class="nom-groupe">En-tête et pied de page</div>
+      </div>
+      <div class="groupe-ruban">
+        <div class="contenu"><button class="br grand" data-ic="tableau" data-menu="menu-tableau">Tableau <span class="fleche">▾</span></button></div>
+        <div class="nom-groupe">Tableaux</div>
+      </div>
+      <div class="groupe-ruban">
+        <div class="contenu"><button class="br grand" data-ic="image" data-cmd="image" title="Insérer une image depuis l'ordinateur">Images</button></div>
+        <div class="nom-groupe">Illustrations</div>
+      </div>
+      <div class="groupe-ruban">
+        <div class="contenu"><button class="br grand" data-ic="lien" data-cmd="lien" title="Insérer un lien (Ctrl+K)">Lien</button></div>
+        <div class="nom-groupe">Liens</div>
+      </div>
+      <div class="groupe-ruban">
+        <div class="contenu">
+          <button class="br grand" data-ic="equation" data-cmd="equation" title="Équation (Alt+=) : fraction, puissance, racine…">Équation</button>
+          <button class="br grand" data-ic="symbole" data-menu="menu-symboles">Symbole <span class="fleche">▾</span></button>
+        </div>
+        <div class="nom-groupe">Symboles</div>
+      </div>
+    </section>
+
+    <!-- Mise en page -->
+    <section class="ruban" data-panneau="mise-en-page" hidden>
+      <div class="groupe-ruban">
+        <div class="contenu">
+          <button class="br grand" data-ic="marges" data-menu="menu-marges">Marges <span class="fleche">▾</span></button>
+          <button class="br grand" data-ic="orientation" data-menu="menu-orientation">Orientation <span class="fleche">▾</span></button>
+        </div>
+        <div class="nom-groupe">Mise en page</div>
+      </div>
+    </section>
+
+    <!-- Affichage -->
+    <section class="ruban" data-panneau="affichage" hidden>
+      <div class="groupe-ruban">
+        <div class="contenu"><button class="br grand actif" data-ic="regle" data-cmd="regle" id="btn-regle">Règle</button></div>
+        <div class="nom-groupe">Afficher</div>
+      </div>
+      <div class="groupe-ruban">
+        <div class="contenu">
+          <button class="br grand" data-ic="zoom" data-cmd="zoom100">100 %</button>
+          <button class="br grand" data-ic="orientation" data-cmd="une-page">Une page</button>
+          <button class="br grand" data-ic="marges" data-cmd="largeur-page">Largeur de page</button>
+        </div>
+        <div class="nom-groupe">Zoom</div>
+      </div>
+    </section>
+
+    <!-- Équation (onglet contextuel, comme « Conception d'équation » dans Word) -->
+    <section class="ruban" data-panneau="equation" hidden>
+      <div class="groupe-ruban">
+        <div class="contenu" id="eq-structures"></div>
+        <div class="nom-groupe">Structures</div>
+      </div>
+      <div class="groupe-ruban">
+        <div class="contenu grille-eq-symboles" id="eq-symboles"></div>
+        <div class="nom-groupe">Symboles</div>
+      </div>
+      <div class="groupe-ruban">
+        <div class="contenu"><button class="br grand" data-ic="corbeille" data-cmd="supprimer-equation" title="Supprimer l'équation (Ctrl+Z pour annuler)">Supprimer l'équation</button></div>
+        <div class="nom-groupe">Outils</div>
+      </div>
+      <div class="aide-eq"><b>/</b> fraction · <b>^</b> exposant · <b>_</b> indice<br><b>√</b> racine · <b>( )</b> pour regrouper<br>ex. <code>1/2 m v^2</code> · <b>Entrée</b> pour sortir</div>
+    </section>
+
+    <div class="bandeau-info" id="bandeau-info" hidden></div>
+
+    <div class="zone-page" id="zone-page">
+      <div class="feuille" id="feuille">
+        <div class="regle" id="regle"></div>
+        <div class="pile-pages" id="pile-pages">
+          <div class="fonds-pages" id="fonds-pages" aria-hidden="true"></div>
+          <div class="page" id="page" contenteditable="true" spellcheck="true" lang="fr"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="barre-image" id="barre-image" hidden>
+      Image : <button class="br" data-taille="25">Petite</button><button class="br" data-taille="50">Moyenne</button><button class="br" data-taille="100">Pleine largeur</button><button class="br" id="btn-suppr-image">Supprimer</button>
+    </div>
+
+    <footer class="barre-etat-office">
+      <span id="pages">Page 1 sur 1</span>
+      <span id="compteur">0 mot</span>
+      <span>Français (France)</span>
+      <span class="espace"></span>
+      <button class="br" data-cmd="zoom-" title="Zoom arrière">−</button>
+      <input type="range" id="zoom" min="50" max="200" step="10" value="100" title="Zoom">
+      <button class="br" data-cmd="zoom+" title="Zoom avant">+</button>
+      <span class="zoom-val" id="zoom-val">100 %</span>
+    </footer>
+  </div>
+  <input type="file" id="fichier-image" accept="image/png,image/jpeg,image/gif,image/webp" hidden>
+
+  <!-- Menus -->
+  <div class="menu-flottant" id="menu-fichier" hidden>
+    <button data-cmd="nouveau"><span data-ic="nouveau"></span>Nouveau document<span class="raccourci-menu">Ctrl+N</span></button>
+    <button data-cmd="ouvrir"><span data-ic="ouvrir"></span>Ouvrir…<span class="raccourci-menu">Ctrl+O</span></button>
+    <button data-cmd="enregistrer"><span data-ic="enregistrer"></span>Enregistrer<span class="raccourci-menu">Ctrl+S</span></button>
+    <button data-cmd="enregistrer-sous"><span data-ic="enregistrer"></span>Enregistrer sous…<span class="raccourci-menu">F12</span></button>
+    <button data-cmd="pdf"><span data-ic="imprimer"></span>Imprimer / Exporter en PDF<span class="raccourci-menu">Ctrl+P</span></button>
+    <hr>
+    <button data-cmd="raccourcis"><span data-ic="clavier"></span>Raccourcis clavier<span class="raccourci-menu">F1</span></button>
+  </div>
+  <div class="menu-flottant" id="menu-interligne" hidden>
+    <button data-interligne="1">1,0</button><button data-interligne="1.15">1,15</button><button data-interligne="1.5">1,5</button><button data-interligne="2">2,0</button><button data-interligne="3">3,0</button>
+  </div>
+  <div class="menu-flottant" id="menu-tableau" hidden>
+    <div class="titre-grille" id="titre-grille">Insérer un tableau</div>
+    <div class="grille-tableau" id="grille-tableau"></div>
+    <hr>
+    <button data-cmd="tableau-fenetre"><span data-ic="tableau"></span>Insérer un tableau…</button>
+  </div>
+  <div class="menu-flottant" id="menu-symboles" hidden>
+    <div class="grille-symboles" id="grille-symboles"></div>
+  </div>
+  <div class="menu-flottant" id="menu-marges" hidden>
+    <button data-marges="normales"><b>Normales</b>&nbsp; 2,54 cm de chaque côté</button>
+    <button data-marges="etroites"><b>Étroites</b>&nbsp; 1,27 cm</button>
+    <button data-marges="larges"><b>Larges</b>&nbsp; 2,54 cm haut/bas, 5,08 cm gauche/droite</button>
+  </div>
+  <div class="menu-flottant" id="menu-orientation" hidden>
+    <button data-orientation="portrait">Portrait</button>
+    <button data-orientation="paysage">Paysage</button>
+  </div>
+  <div class="menu-flottant" id="menu-contextuel" hidden>
+    <button data-cmd="cut"><span data-ic="couper"></span>Couper</button>
+    <button data-cmd="copy"><span data-ic="copier"></span>Copier</button>
+    <button data-cmd="coller"><span data-ic="coller"></span>Coller</button>
+    <div id="ctx-tableau">
+      <hr>
+      <button data-table="ligne-dessous"><span data-ic="insererLigne"></span>Insérer une ligne en dessous</button>
+      <button data-table="colonne-droite"><span data-ic="insererLigne"></span>Insérer une colonne à droite</button>
+      <button data-table="suppr-ligne"><span data-ic="supprimerLigne"></span>Supprimer la ligne</button>
+      <button data-table="suppr-colonne"><span data-ic="supprimerLigne"></span>Supprimer la colonne</button>
+      <button data-table="suppr-tableau"><span data-ic="supprimerLigne"></span>Supprimer le tableau</button>
+    </div>
+  </div>
+
+  <div class="fond-fenetre" id="fenetre-entete" hidden>
+    <form class="fenetre" id="form-entete">
+      <h2>En-tête et pied de page</h2>
+      <p class="note">Ils apparaissent sur toutes les pages. Double-clique en haut ou en bas d'une page pour revenir ici.</p>
+      <div class="deux">
+        <label class="champ"><span>En-tête</span><input id="e-entete" placeholder="ex. Prénom NOM — 2nde MELEC — TP Loi d'Ohm"></label>
+        <label class="champ"><span>Alignement</span><select id="e-align-entete"><option value="left">À gauche</option><option value="center">Centré</option><option value="right">À droite</option></select></label>
+      </div>
+      <div class="deux">
+        <label class="champ"><span>Pied de page</span><input id="e-pied" placeholder="ex. Lycée professionnel…"></label>
+        <label class="champ"><span>Alignement</span><select id="e-align-pied"><option value="left">À gauche</option><option value="center">Centré</option><option value="right">À droite</option></select></label>
+      </div>
+      <div class="deux">
+        <label class="champ"><span>Numéro de page (en bas)</span><select id="e-numero"><option value="aucun">Aucun</option><option value="page">1, 2, 3…</option><option value="page-sur">Page 1 sur 3</option></select></label>
+        <label class="champ"><span>Position du numéro</span><select id="e-align-numero"><option value="left">À gauche</option><option value="center">Centré</option><option value="right">À droite</option></select></label>
+      </div>
+      <div class="boutons-fenetre">
+        <button type="button" class="btn" id="e-effacer" style="margin-right:auto">Tout retirer</button>
+        <button type="button" class="btn" id="e-annuler">Annuler</button>
+        <button type="submit" class="btn principal">OK</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="fond-fenetre" id="fenetre-raccourcis" hidden>
+    <div class="fenetre fenetre-raccourcis" role="dialog" aria-label="Raccourcis clavier">
+      <h2>Raccourcis clavier</h2>
+      <p class="note">Les mêmes que dans Word. Sélectionne d'abord le texte, puis appuie sur les touches en même temps.</p>
+      <div class="liste-raccourcis" id="liste-raccourcis"></div>
+      <div class="boutons-fenetre"><button type="button" class="btn principal" id="r-fermer">Fermer</button></div>
+    </div>
+  </div>
+
+  <div class="fond-fenetre" id="fenetre-tableau" hidden>
+    <form class="fenetre" id="form-tableau">
+      <h2>Insérer un tableau</h2>
+      <div class="deux">
+        <label class="champ"><span>Nombre de lignes</span><input type="number" id="t-lignes" value="4" min="1" max="50"></label>
+        <label class="champ"><span>Nombre de colonnes</span><input type="number" id="t-colonnes" value="3" min="1" max="12"></label>
+      </div>
+      <label class="case"><input type="checkbox" id="t-entete" checked> Première ligne en en-tête (gras)</label>
+      <div class="boutons-fenetre">
+        <button type="button" class="btn" id="t-annuler">Annuler</button>
+        <button type="submit" class="btn principal">OK</button>
+      </div>
+    </form>
+  </div>
+
+  <script src="../../commun/equations.js"></script>
+  <script src="texte.js"></script>
+</body>
+</html>

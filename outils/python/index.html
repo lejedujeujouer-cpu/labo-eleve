@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title>Python</title>
+  <link rel="stylesheet" href="../../commun/outil.css">
+  <link rel="stylesheet" href="../../commun/biblio/codemirror/codemirror.css">
+  <link rel="stylesheet" href="python.css">
+  <script src="../../commun/outil.js"></script>
+  <script src="../../commun/document.js"></script>
+  <script src="../../commun/biblio/codemirror/codemirror.js"></script>
+  <script src="../../commun/biblio/codemirror/python.js"></script>
+  <script src="../../commun/biblio/codemirror/matchbrackets.js"></script>
+  <script src="../../commun/biblio/codemirror/closebrackets.js"></script>
+  <script src="../../commun/biblio/codemirror/active-line.js"></script>
+  <script src="../../commun/biblio/codemirror/comment.js"></script>
+  <script src="../../commun/biblio/skulpt.min.js"></script>
+  <script src="../../commun/biblio/skulpt-stdlib.js"></script>
+</head>
+<body>
+  <header class="barre">
+    <div class="titre-py"><img src="icone.svg" alt=""><b>Python</b><span id="nom-fichier">programme.py</span><span id="etat-fichier"></span></div>
+    <div class="actions">
+      <button class="btn principal" id="btn-executer" title="Exécuter le programme (F5)">▶ Exécuter</button>
+      <button class="btn" id="btn-arreter" title="Arrêter le programme (Échap)" disabled>■ Arrêter</button>
+      <span class="sep"></span>
+      <div class="menu-conteneur">
+        <button class="btn" id="btn-exemples" aria-haspopup="true">📚 Exemples ▾</button>
+        <div class="menu" id="menu-exemples" hidden></div>
+      </div>
+      <button class="btn" id="btn-exercices">🎯 Exercices <span class="score" id="score"></span></button>
+      <span class="sep"></span>
+      <button class="btn" id="btn-nouveau" title="Nouveau programme">Nouveau</button>
+      <div class="menu-conteneur">
+        <button class="btn" id="btn-ouvrir" title="Ouvrir un programme de Mes documents">Ouvrir ▾</button>
+        <div class="menu" id="menu-ouvrir" hidden></div>
+      </div>
+      <button class="btn" id="btn-enregistrer" title="Enregistrer dans Mes documents (Ctrl+S)">Enregistrer</button>
+      <span class="sep"></span>
+      <button class="btn carre" id="btn-moins" title="Texte plus petit">A−</button>
+      <button class="btn carre" id="btn-plus" title="Texte plus grand">A+</button>
+    </div>
+  </header>
+
+  <section class="bandeau-exercice" id="bandeau-exercice" hidden>
+    <div class="ex-entete">
+      <span class="notion" id="ex-notion"></span>
+      <b id="ex-titre"></b>
+      <span class="espace"></span>
+      <button class="btn principal" id="btn-verifier">✔ Vérifier</button>
+      <button class="btn" id="btn-indice">💡 Indice</button>
+      <button class="btn" id="btn-quitter-ex" title="Quitter l'exercice">✕</button>
+    </div>
+    <div class="ex-enonce" id="ex-enonce"></div>
+    <div class="ex-indice" id="ex-indice" hidden></div>
+    <ul class="ex-resultats" id="ex-resultats" hidden></ul>
+  </section>
+
+  <main class="espace-travail" id="espace-travail">
+    <div class="cote-editeur"><div id="editeur"></div></div>
+    <div class="separateur" id="separateur" title="Faire glisser pour changer la largeur"></div>
+    <div class="cote-droit">
+      <section class="zone-tortue" id="zone-tortue" hidden>
+        <div class="titre-zone">🐢 Tortue</div>
+        <div id="tortue"></div>
+      </section>
+      <section class="zone-console">
+        <div class="titre-zone">Console <span class="espace"></span><button class="lien" id="btn-effacer">Effacer</button></div>
+        <div id="console" class="console" tabindex="-1"><span class="aide-console">Écris ton programme à gauche, puis clique sur ▶ Exécuter (ou F5). Le résultat s'affiche ici.</span></div>
+      </section>
+    </div>
+  </main>
+
+  <div class="fond-dialogue" id="dlg-exercices" hidden>
+    <div class="dialogue-ex">
+      <header><h2>🎯 Exercices</h2><button class="btn carre" id="btn-fermer-exercices" aria-label="Fermer">✕</button></header>
+      <p class="note">Choisis un exercice : écris ton programme, puis clique sur <b>✔ Vérifier</b>. Ton programme est testé automatiquement.</p>
+      <div class="liste-ex" id="liste-ex"></div>
+    </div>
+  </div>
+
+  <script src="exercices.js"></script>
+  <script src="erreurs.js"></script>
+  <script src="python.js"></script>
+</body>
+</html>

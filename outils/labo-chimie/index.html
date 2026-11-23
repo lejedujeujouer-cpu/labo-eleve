@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title>Labo de chimie</title>
+  <link rel="stylesheet" href="../../commun/outil.css">
+  <link rel="stylesheet" href="../../commun/labo-virtuel/moteur.css">
+  <script src="../../commun/outil.js"></script>
+  <script src="../../commun/document.js"></script>
+  <script src="../../commun/labo-virtuel/moteur.js"></script>
+  <script src="manips.js"></script>
+</head>
+<body>
+  <script>
+    LaboVirtuel.demarrer({
+      outil: 'labo-chimie', titre: 'Labo de chimie', icone: '⚗️', couleur: '#0f766e',
+      sousTitre: 'Choisis une manipulation. Équipe-toi, suis le protocole (ou construis-le toi-même) dans le panneau de droite, réalise les gestes sur la paillasse et note tes mesures.',
+      manips: window.MANIPS_CHIMIE,
+    });
+  </script>
+</body>
+</html>

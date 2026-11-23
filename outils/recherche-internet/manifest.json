@@ -1,0 +1,11 @@
+{
+  "id": "recherche-internet",
+  "titre": "Recherche internet",
+  "description": "Cherche des informations sur Internet sans quitter Labo Élève (filtre parental strict). Disponible quand ton professeur l'active.",
+  "matiere": "internet",
+  "version": "1.0.0",
+  "icone": "icone.svg",
+  "couleur": "#d97706",
+  "site": "recherche",
+  "motsCles": ["recherche", "internet", "web", "navigateur", "google", "exposé", "information"]
+}

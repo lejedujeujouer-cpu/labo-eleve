@@ -1,0 +1,11 @@
+{
+  "id": "pronote",
+  "titre": "Pronote",
+  "description": "Emploi du temps, notes, devoirs et absences, dans Labo Élève. Connexion avec ton compte EduConnect ou par ton ENT.",
+  "matiere": "etablissement",
+  "version": "1.0.0",
+  "icone": "icone.svg",
+  "couleur": "#15803d",
+  "site": "pronote",
+  "motsCles": ["pronote", "notes", "devoirs", "emploi du temps", "absences", "vie scolaire"]
+}

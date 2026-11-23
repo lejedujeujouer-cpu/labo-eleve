@@ -1,0 +1,467 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title>Tableur</title>
+  <link rel="stylesheet" href="../../commun/outil.css">
+  <link rel="stylesheet" href="../../commun/ruban.css">
+  <script src="../../commun/outil.js"></script>
+  <script src="../../commun/document.js"></script>
+  <script src="../../commun/ruban.js"></script>
+  <script src="../../commun/biblio/xlsx.js"></script>
+  <script src="../../commun/biblio/exceljs.js"></script>
+  <script src="../../commun/biblio/chart.js"></script>
+  <link rel="stylesheet" href="tableur.css">
+</head>
+<body>
+  <div class="office tableur">
+    <!-- Barre de titre et accès rapide -->
+    <div class="barre-titre">
+      <button class="acces" data-ic="enregistrer" data-cmd="enregistrer" title="Enregistrer (Ctrl+S)"></button>
+      <button class="acces" data-ic="annuler" data-cmd="annuler" title="Annuler (Ctrl+Z)"></button>
+      <button class="acces" data-ic="retablir" data-cmd="retablir" title="Rétablir (Ctrl+Y)"></button>
+      <span class="titre-doc"><span id="nom-fichier">Classeur1</span> — Tableur<span class="etat-doc" id="etat-fichier"></span></span>
+    </div>
+
+    <!-- Onglets du ruban -->
+    <nav class="onglets-ruban">
+      <button class="fichier" data-onglet="fichier" id="onglet-fichier">Fichier</button>
+      <button data-onglet="accueil" class="actif">Accueil</button>
+      <button data-onglet="insertion">Insertion</button>
+      <button data-onglet="formules">Formules</button>
+      <button data-onglet="donnees">Données</button>
+      <button data-onglet="affichage">Affichage</button>
+      <button data-onglet="graphique" id="onglet-graphique" class="contextuel" hidden title="Options du graphique sélectionné">Création de graphique</button>
+    </nav>
+
+    <!-- Accueil -->
+    <div class="ruban" data-panneau="accueil">
+      <div class="groupe-ruban">
+        <div class="contenu">
+          <button class="br grand" data-ic="coller" data-cmd="coller" title="Coller (Ctrl+V)">Coller</button>
+          <div class="colonne">
+            <button class="br" data-ic="couper" data-cmd="couper" title="Couper (Ctrl+X)">Couper</button>
+            <button class="br" data-ic="copier" data-cmd="copier" title="Copier (Ctrl+C)">Copier</button>
+          </div>
+        </div>
+        <div class="nom-groupe">Presse-papiers</div>
+      </div>
+      <div class="groupe-ruban">
+        <div class="contenu colonne">
+          <div class="ligne">
+            <select id="nom-police" title="Police" style="width:132px"><option>Calibri</option><option>Arial</option><option>Cambria</option><option>Times New Roman</option><option>Verdana</option><option>Comic Sans MS</option><option>Courier New</option></select>
+            <select id="taille-police" title="Taille de police" style="width:54px"><option>8</option><option>9</option><option>10</option><option selected>11</option><option>12</option><option>14</option><option>16</option><option>18</option><option>20</option><option>24</option><option>28</option><option>36</option></select>
+          </div>
+          <div class="ligne">
+            <button class="br" data-ic="gras" data-style="g" title="Gras (Ctrl+G)"></button>
+            <button class="br" data-ic="italique" data-style="i" title="Italique (Ctrl+I)"></button>
+            <button class="br" data-ic="souligne" data-style="s" title="Souligné (Ctrl+U)"></button>
+            <button class="br" data-ic="bordures" data-menu="menu-bordures" title="Bordures">▾</button>
+          </div>
+          <div class="ligne">
+            <label class="br couleur-br" data-ic="remplissage" title="Couleur de remplissage"><span class="barre-couleur" id="barre-remplissage" style="background:#ffff00"></span><input type="color" id="choix-remplissage" value="#ffff00"></label>
+            <label class="br couleur-br" data-ic="couleurTexte" title="Couleur de police"><span class="barre-couleur" id="barre-police" style="background:#c00000"></span><input type="color" id="choix-police" value="#c00000"></label>
+            <button class="br" data-cmd="sans-couleur" title="Retirer les couleurs">Aucune couleur</button>
+          </div>
+        </div>
+        <div class="nom-groupe">Police</div>
+      </div>
+      <div class="groupe-ruban">
+        <div class="contenu">
+          <button class="br" data-ic="gauche" data-align="left" title="Aligner à gauche"></button>
+          <button class="br" data-ic="centre" data-align="center" title="Centrer"></button>
+          <button class="br" data-ic="droite" data-align="right" title="Aligner à droite"></button>
+          <div class="colonne">
+            <button class="br" data-ic="renvoi" data-cmd="renvoi" id="btn-renvoi" title="Renvoyer à la ligne automatiquement">Renvoyer à la ligne</button>
+            <button class="br" data-ic="fusion" data-cmd="fusionner" id="btn-fusion" title="Fusionner et centrer les cellules sélectionnées">Fusionner et centrer</button>
+          </div>
+        </div>
+        <div class="nom-groupe">Alignement</div>
+      </div>
+      <div class="groupe-ruban">
+        <div class="contenu colonne">
+          <select id="format-nombre" title="Format de nombre">
+            <option value="standard">Standard</option>
+            <option value="nombre">Nombre</option>
+            <option value="pourcentage">Pourcentage</option>
+            <option value="monetaire">Monétaire (€)</option>
+            <option value="date">Date courte</option>
+          </select>
+          <div class="ligne">
+            <button class="br" data-ic="pourcent" data-cmd="pourcentage" title="Style de pourcentage"></button>
+            <button class="br dec" data-cmd="decimales+" title="Ajouter une décimale">←,00</button>
+            <button class="br dec" data-cmd="decimales-" title="Réduire les décimales">,0→</button>
+          </div>
+        </div>
+        <div class="nom-groupe">Nombre</div>
+      </div>
+      <div class="groupe-ruban">
+        <div class="contenu">
+          <button class="br grand" data-ic="insererLigne" data-menu="menu-inserer" title="Insérer des lignes ou des colonnes">Insérer <span class="fleche">▾</span></button>
+          <button class="br grand" data-ic="supprimerLigne" data-menu="menu-supprimer" title="Supprimer des lignes ou des colonnes">Supprimer <span class="fleche">▾</span></button>
+          <button class="br grand" data-ic="format" data-menu="menu-format" title="Hauteur, largeur, masquer">Format <span class="fleche">▾</span></button>
+        </div>
+        <div class="nom-groupe">Cellules</div>
+      </div>
+      <div class="groupe-ruban">
+        <div class="contenu">
+          <div class="colonne">
+          <button class="br" data-ic="somme" data-fonction="SOMME" title="Somme automatique">Somme automatique</button>
+          <button class="br" data-ic="recopier" data-cmd="recopier" title="Recopier vers le bas (Ctrl+D)">Recopier</button>
+          <button class="br" data-ic="effacer" data-cmd="effacer" title="Effacer le contenu (Suppr)">Effacer</button>
+          </div>
+          <button class="br grand" data-ic="trier" data-menu="menu-trier" title="Trier et filtrer">Trier et filtrer <span class="fleche">▾</span></button>
+        </div>
+        <div class="nom-groupe">Édition</div>
+      </div>
+    </div>
+
+    <!-- Insertion -->
+    <div class="ruban" data-panneau="insertion" hidden>
+      <div class="groupe-ruban">
+        <div class="contenu">
+          <button class="br grand" data-ic="nuage" data-graphique="nuage" title="Nuage de points (mesures)">Nuage de points</button>
+          <button class="br grand" data-ic="graphique" data-graphique="courbe" title="Courbe">Courbe</button>
+          <button class="br grand" data-ic="graphique" data-graphique="barres" title="Histogramme">Histo-gramme</button>
+          <button class="br grand" data-ic="secteurs" data-graphique="secteurs" title="Diagramme en secteurs (répartition en %)">Secteurs</button>
+        </div>
+        <div class="nom-groupe">Graphiques</div>
+      </div>
+      <div class="groupe-ruban">
+        <div class="contenu">
+          <button class="br grand" data-ic="insererLigne" data-cmd="feuille+" title="Nouvelle feuille">Nouvelle feuille</button>
+        </div>
+        <div class="nom-groupe">Feuilles</div>
+      </div>
+    </div>
+
+    <!-- Formules -->
+    <div class="ruban" data-panneau="formules" hidden>
+      <div class="groupe-ruban">
+        <div class="contenu">
+          <button class="br grand" data-ic="fx" data-cmd="fx" title="Insérer une fonction (description de chaque fonction)">Insérer une fonction</button>
+          <button class="br grand" data-ic="fx" data-menu="menu-fonctions" title="Fonctions les plus utilisées">Fonctions courantes <span class="fleche">▾</span></button>
+          <button class="br grand" data-ic="somme" data-fonction="SOMME" title="Somme automatique">Somme auto.</button>
+          <div class="colonne">
+            <button class="br" data-fonction="MOYENNE">Moyenne</button>
+            <button class="br" data-fonction="MIN">Min</button>
+            <button class="br" data-fonction="MAX">Max</button>
+          </div>
+          <div class="colonne">
+            <button class="br" data-fonction="NB">Nb</button>
+            <button class="br" data-fonction="ECARTYPE">Écart-type</button>
+            <button class="br" data-fonction="MEDIANE">Médiane</button>
+          </div>
+        </div>
+        <div class="nom-groupe">Bibliothèque de fonctions</div>
+      </div>
+      <div class="groupe-ruban">
+        <div class="contenu">
+          <button class="br grand" data-ic="de" data-cmd="simulation" title="Simuler une expérience aléatoire (pièce, dé…) : tirages, fréquences et graphiques">Simulation</button>
+          <button class="br grand" data-ic="relancer" data-cmd="relancer" title="Refaire tous les tirages au hasard (F9)">Relancer (F9)</button>
+          <div class="colonne">
+            <button class="br" data-fonction="ALEA.ENTRE.BORNES" title="Entier au hasard entre deux bornes">Alea entre bornes</button>
+            <button class="br" data-fonction="NB.SI" title="Compter les cellules qui vérifient un critère">Nb.si</button>
+            <button class="br" data-fonction="LOI.BINOMIALE" title="Loi binomiale">Loi binomiale</button>
+          </div>
+        </div>
+        <div class="nom-groupe">Probabilités</div>
+      </div>
+    </div>
+
+    <!-- Données -->
+    <div class="ruban" data-panneau="donnees" hidden>
+      <div class="groupe-ruban">
+        <div class="contenu">
+          <button class="br grand" data-ic="trierAZ" data-cmd="trier-az" title="Trier du plus petit au plus grand (A → Z)">Trier A → Z</button>
+          <button class="br grand" data-ic="trierZA" data-cmd="trier-za" title="Trier du plus grand au plus petit (Z → A)">Trier Z → A</button>
+          <button class="br grand" data-ic="filtre" data-cmd="filtrer" id="btn-filtrer" title="Ajouter des filtres sur la ligne d'en-tête">Filtrer</button>
+          <button class="br grand" data-ic="effacer" data-cmd="effacer-filtres" title="Afficher de nouveau toutes les lignes">Effacer les filtres</button>
+        </div>
+        <div class="nom-groupe">Trier et filtrer</div>
+      </div>
+    </div>
+
+    <!-- Affichage -->
+    <div class="ruban" data-panneau="affichage" hidden>
+      <div class="groupe-ruban">
+        <div class="contenu">
+          <button class="br grand actif" data-ic="quadrillage" data-cmd="quadrillage" id="btn-quadrillage" title="Afficher le quadrillage">Quadrillage</button>
+        </div>
+        <div class="nom-groupe">Afficher</div>
+      </div>
+      <div class="groupe-ruban">
+        <div class="contenu"><button class="br grand" data-ic="figer" data-menu="menu-figer" title="Garder des lignes ou des colonnes visibles pendant le défilement">Figer les volets <span class="fleche">▾</span></button></div>
+        <div class="nom-groupe">Fenêtre</div>
+      </div>
+      <div class="groupe-ruban">
+        <div class="contenu">
+          <button class="br grand" data-ic="zoom" data-cmd="zoom100" title="Zoom à 100 %">100 %</button>
+          <div class="colonne">
+            <button class="br" data-cmd="zoom+">Zoom +</button>
+            <button class="br" data-cmd="zoom-">Zoom −</button>
+          </div>
+        </div>
+        <div class="nom-groupe">Zoom</div>
+      </div>
+    </div>
+
+    <!-- Création de graphique (onglet affiché quand un graphique est sélectionné) -->
+    <div class="ruban ruban-graphique" data-panneau="graphique" hidden>
+      <div class="groupe-ruban">
+        <div class="contenu">
+          <button class="br grand" data-ic="nuage" data-gtype="nuage" title="Nuage de points">Nuage</button>
+          <button class="br grand" data-ic="graphique" data-gtype="courbe" title="Courbe">Courbe</button>
+          <button class="br grand" data-ic="graphique" data-gtype="barres" title="Histogramme">Histo-gramme</button>
+          <button class="br grand" data-ic="secteurs" data-gtype="secteurs" title="Diagramme en secteurs">Secteurs</button>
+        </div>
+        <div class="nom-groupe">Type</div>
+      </div>
+      <div class="groupe-ruban">
+        <div class="contenu colonne">
+          <button class="br" data-ic="tableau" data-cmd="g-donnees" title="Changer les cellules utilisées par le graphique">Sélectionner les données</button>
+          <span class="info-ruban" id="gc-plage"></span>
+        </div>
+        <div class="nom-groupe">Données</div>
+      </div>
+      <div class="groupe-ruban">
+        <div class="contenu colonne">
+          <label class="champ-ruban"><span>Titre</span><input type="text" id="gc-titre" placeholder="(aucun)"></label>
+          <label class="champ-ruban"><span>Axe horizontal</span><input type="text" id="gc-axex" placeholder="(aucun)"></label>
+          <label class="champ-ruban"><span>Axe vertical</span><input type="text" id="gc-axey" placeholder="(aucun)"></label>
+        </div>
+        <div class="nom-groupe">Titres</div>
+      </div>
+      <div class="groupe-ruban">
+        <div class="contenu colonne">
+          <label class="champ-ruban"><span>Légende</span><select id="gc-legende"><option value="top">En haut</option><option value="bottom">En bas</option><option value="right">À droite</option><option value="left">À gauche</option><option value="aucune">Aucune</option></select></label>
+          <label class="case-ruban"><input type="checkbox" id="gc-quadrillage"> Quadrillage</label>
+          <label class="case-ruban"><input type="checkbox" id="gc-etiquettes"> Étiquettes de données</label>
+        </div>
+        <div class="nom-groupe">Éléments</div>
+      </div>
+      <div class="groupe-ruban" id="gc-groupe-tendance">
+        <div class="contenu colonne">
+          <label class="champ-ruban"><span>Tendance</span><select id="gc-tendance"><option value="">Aucune</option><option value="affine">y = a·x + b</option><option value="lineaire">y = k·x (origine)</option></select></label>
+          <label class="case-ruban"><input type="checkbox" id="gc-equation"> Équation et R²</label>
+        </div>
+        <div class="nom-groupe">Tendance</div>
+      </div>
+      <div class="groupe-ruban" id="gc-groupe-axes">
+        <div class="contenu colonne">
+          <div class="ligne"><label class="champ-ruban"><span>X min</span><input type="number" id="gc-xmin" step="any" placeholder="auto"></label><label class="champ-ruban"><span>X max</span><input type="number" id="gc-xmax" step="any" placeholder="auto"></label></div>
+          <div class="ligne"><label class="champ-ruban"><span>Y min</span><input type="number" id="gc-ymin" step="any" placeholder="auto"></label><label class="champ-ruban"><span>Y max</span><input type="number" id="gc-ymax" step="any" placeholder="auto"></label></div>
+        </div>
+        <div class="nom-groupe">Axes</div>
+      </div>
+      <div class="groupe-ruban">
+        <div class="contenu colonne couleurs-graphique" id="gc-couleurs"></div>
+        <div class="nom-groupe">Couleurs</div>
+      </div>
+      <div class="groupe-ruban">
+        <div class="contenu colonne">
+          <label class="champ-ruban"><span>Taille</span><select id="gc-hauteur"><option value="petit">Petit</option><option value="moyen">Moyen</option><option value="grand">Grand</option></select></label>
+          <button class="br" data-ic="copier" data-cmd="g-copier">Copier l'image</button>
+          <button class="br" data-ic="effacer" data-cmd="g-suppr">Supprimer le graphique</button>
+        </div>
+        <div class="nom-groupe">Graphique</div>
+      </div>
+    </div>
+
+    <!-- Zone Nom et barre de formule -->
+    <div class="barre-formule">
+      <input id="zone-nom" class="zone-nom" value="A1" title="Zone Nom : tape une adresse (ex. B5) puis Entrée" spellcheck="false" autocomplete="off">
+      <div class="boutons-formule">
+        <button id="btn-annuler-saisie" title="Annuler la saisie (Échap)">✕</button>
+        <button id="btn-valider-saisie" title="Valider (Entrée)">✓</button>
+        <button id="btn-fx" title="Insérer une fonction" data-cmd="fx"><i>fx</i></button>
+      </div>
+      <div class="champ-formule"><input type="text" id="saisie-formule" spellcheck="false" autocomplete="off"></div>
+    </div>
+
+    <div class="corps">
+      <div class="zone-grille" id="zone-grille" tabindex="0">
+        <div class="contenu-grille" id="contenu-grille">
+          <table class="grille" id="grille"></table>
+          <div class="cadre-selection" id="cadre-selection" hidden><span class="poignee" id="poignee" title="Poignée de recopie : fais-la glisser"></span></div>
+          <div class="cadre-recopie" id="cadre-recopie" hidden></div>
+          <input type="text" class="editeur-cellule" id="editeur" spellcheck="false" autocomplete="off" hidden>
+        </div>
+      </div>
+      <aside class="panneau-graphiques" id="panneau-graphiques" hidden>
+        <div class="entete-panneau"><b>Graphiques</b><button class="br" id="btn-fermer-panneau" title="Masquer">✕</button></div>
+        <div id="liste-graphiques"></div>
+      </aside>
+    </div>
+
+    <!-- Onglets des feuilles -->
+    <div class="onglets-feuilles">
+      <button class="br" data-cmd="feuille+" title="Nouvelle feuille">＋</button>
+      <div id="onglets" class="liste-onglets"></div>
+    </div>
+
+    <!-- Barre d'état -->
+    <div class="barre-etat-office">
+      <span id="mode-saisie">Prêt</span>
+      <span class="espace"></span>
+      <span id="resume-selection"></span>
+      <button class="br" data-cmd="zoom-" title="Zoom arrière">−</button>
+      <input type="range" id="zoom" min="50" max="200" step="10" value="100" title="Zoom">
+      <button class="br" data-cmd="zoom+" title="Zoom avant">+</button>
+      <span class="zoom-val" id="zoom-val">100 %</span>
+    </div>
+  </div>
+
+  <!-- Menus déroulants -->
+  <div class="menu-flottant" id="menu-bordures" hidden>
+    <button data-bordure="tout">⊞ Toutes les bordures</button>
+    <button data-bordure="contour">☐ Bordure extérieure</button>
+    <button data-bordure="bas">▁ Bordure inférieure</button>
+    <button data-bordure="aucune">⬚ Aucune bordure</button>
+  </div>
+  <div class="menu-flottant" id="menu-inserer" hidden>
+    <button data-cmd="ligne+">Insérer une ligne au-dessus</button>
+    <button data-cmd="colonne+">Insérer une colonne à gauche</button>
+  </div>
+  <div class="menu-flottant" id="menu-supprimer" hidden>
+    <button data-cmd="ligne-">Supprimer la ligne</button>
+    <button data-cmd="colonne-">Supprimer la colonne</button>
+  </div>
+  <div class="menu-flottant" id="menu-format" hidden>
+    <button data-cmd="hauteur">↕ Hauteur de ligne…</button>
+    <button data-cmd="largeur">↔ Largeur de colonne…</button>
+    <hr>
+    <button data-cmd="masquer-lignes">Masquer les lignes</button>
+    <button data-cmd="masquer-colonnes">Masquer les colonnes</button>
+    <button data-cmd="afficher-lignes">Afficher les lignes masquées</button>
+    <button data-cmd="afficher-colonnes">Afficher les colonnes masquées</button>
+  </div>
+  <div class="menu-flottant" id="menu-trier" hidden>
+    <button data-cmd="trier-az">↑ Trier de A à Z (du plus petit au plus grand)</button>
+    <button data-cmd="trier-za">↓ Trier de Z à A (du plus grand au plus petit)</button>
+    <hr>
+    <button data-cmd="filtrer">⏷ Filtrer</button>
+    <button data-cmd="effacer-filtres">Effacer les filtres</button>
+  </div>
+  <div class="menu-flottant" id="menu-figer" hidden>
+    <button data-cmd="figer">Figer les volets (au-dessus et à gauche de la cellule active)</button>
+    <button data-cmd="figer-ligne">Figer la ligne supérieure</button>
+    <button data-cmd="figer-colonne">Figer la première colonne</button>
+    <hr>
+    <button data-cmd="liberer">Libérer les volets</button>
+  </div>
+  <div class="menu-flottant" id="menu-entete" hidden>
+    <button data-cmd="couper">✂ Couper</button>
+    <button data-cmd="copier">⧉ Copier</button>
+    <button data-cmd="coller">📋 Coller</button>
+    <hr>
+    <button data-cmd="entete-inserer">Insérer</button>
+    <button data-cmd="entete-supprimer">Supprimer</button>
+    <hr>
+    <button data-cmd="entete-taille">Largeur / hauteur…</button>
+    <button data-cmd="entete-masquer">Masquer</button>
+    <button data-cmd="entete-afficher">Afficher</button>
+  </div>
+  <div class="menu-flottant menu-filtre" id="menu-filtre" hidden></div>
+  <div class="menu-flottant" id="menu-fonctions" hidden>
+    <button data-fonction="SOMME">SOMME — somme</button>
+    <button data-fonction="MOYENNE">MOYENNE — moyenne</button>
+    <button data-fonction="MIN">MIN — plus petite valeur</button>
+    <button data-fonction="MAX">MAX — plus grande valeur</button>
+    <button data-fonction="NB">NB — nombre de valeurs</button>
+    <button data-fonction="ECARTYPE">ECARTYPE — écart-type</button>
+    <button data-fonction="MEDIANE">MEDIANE — médiane</button>
+    <hr>
+    <button data-fonction="ARRONDI">ARRONDI — arrondir</button>
+    <button data-fonction="RACINE">RACINE — racine carrée</button>
+    <button data-fonction="PUISSANCE">PUISSANCE — puissance</button>
+    <button data-fonction="SI">SI — condition</button>
+  </div>
+  <div class="menu-flottant" id="menu-contextuel" hidden>
+    <button data-cmd="couper">✂ Couper</button>
+    <button data-cmd="copier">⧉ Copier</button>
+    <button data-cmd="coller">📋 Coller</button>
+    <hr>
+    <button data-cmd="ligne+">Insérer une ligne au-dessus</button>
+    <button data-cmd="colonne+">Insérer une colonne à gauche</button>
+    <button data-cmd="ligne-">Supprimer la ligne</button>
+    <button data-cmd="colonne-">Supprimer la colonne</button>
+    <hr>
+    <button data-cmd="effacer">Effacer le contenu</button>
+  </div>
+  <div class="menu-flottant menu-fichier" id="menu-fichier" hidden>
+    <button data-cmd="nouveau">📄 Nouveau classeur</button>
+    <button data-cmd="enregistrer">💾 Enregistrer</button>
+    <button data-cmd="enregistrer-sous">💾 Enregistrer sous…</button>
+    <button data-cmd="exporter-csv">⇩ Exporter en CSV</button>
+    <button data-cmd="pdf">🖨 Imprimer / Exporter en PDF</button>
+  </div>
+
+  <!-- Création d'un graphique -->
+  <div class="fond-fenetre" id="fenetre-graphique" hidden>
+    <form class="fenetre" id="form-graphique">
+      <h2>Insérer un graphique</h2>
+      <p class="note" id="info-plage"></p>
+      <label class="champ"><span>Type</span>
+        <select id="g-type">
+          <option value="nuage">Nuage de points (mesures)</option>
+          <option value="courbe">Courbe</option>
+          <option value="barres">Histogramme</option>
+          <option value="secteurs">Diagramme en secteurs</option>
+        </select>
+      </label>
+      <label class="champ"><span>Titre du graphique</span><input type="text" id="g-titre" placeholder="ex. Tension en fonction de l'intensité"></label>
+      <div class="deux" id="g-axes">
+        <label class="champ"><span>Titre de l'axe horizontal</span><input type="text" id="g-axex"></label>
+        <label class="champ"><span>Titre de l'axe vertical</span><input type="text" id="g-axey"></label>
+      </div>
+      <div id="g-options-tendance">
+        <label class="case"><input type="radio" name="g-tendance" value="" checked> Pas de courbe de tendance</label>
+        <label class="case"><input type="radio" name="g-tendance" value="affine"> Courbe de tendance linéaire y = a·x + b</label>
+        <label class="case"><input type="radio" name="g-tendance" value="lineaire"> Linéaire passant par l'origine y = k·x</label>
+      </div>
+      <p class="note">La première colonne donne l'axe horizontal ; les colonnes suivantes sont les séries. Si la première ligne contient du texte, elle sert de légende.</p>
+      <div class="boutons-fenetre">
+        <button type="button" class="btn" id="g-annuler">Annuler</button>
+        <button type="submit" class="btn principal">Insérer</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="fond-fenetre" id="fenetre-simulation" hidden>
+    <form class="fenetre" id="form-simulation">
+      <h2>Simulation d'une expérience aléatoire</h2>
+      <p class="note">Une nouvelle feuille est créée : un tirage par ligne, le tableau des effectifs et des fréquences, et les graphiques. <b>F9</b> relance tous les tirages.</p>
+      <label class="champ"><span>Expérience</span>
+        <select id="s-experience">
+          <option value="piece">Lancer d'une pièce (Pile ou Face)</option>
+          <option value="de" selected>Lancer d'un dé à 6 faces</option>
+          <option value="deux-des">Somme de deux dés</option>
+          <option value="entier">Nombre entier au hasard entre deux bornes</option>
+          <option value="evenement">Épreuve à deux issues : succès (1) avec la probabilité p</option>
+        </select>
+      </label>
+      <div class="deux" id="s-bornes" hidden>
+        <label class="champ"><span>De</span><input type="number" id="s-min" value="1" step="1"></label>
+        <label class="champ"><span>à</span><input type="number" id="s-max" value="10" step="1"></label>
+      </div>
+      <label class="champ" id="s-proba" hidden><span>Probabilité p du succès (ex. 0,3)</span><input type="text" id="s-p" value="0,3"></label>
+      <div class="deux">
+        <label class="champ"><span>Nombre de tirages</span><input type="number" id="s-n" value="100" min="1" max="2000" step="1"></label>
+        <label class="champ"><span>Issue suivie (courbe de fréquence)</span><select id="s-suivie"></select></label>
+      </div>
+      <label class="case"><input type="checkbox" id="s-barres" checked> Graphique : fréquences observées et probabilités</label>
+      <label class="case"><input type="checkbox" id="s-courbe" checked> Graphique : évolution de la fréquence de l'issue suivie (loi des grands nombres)</label>
+      <p class="erreur" id="s-erreur"></p>
+      <div class="boutons-fenetre">
+        <button type="button" class="btn" id="s-annuler">Annuler</button>
+        <button type="submit" class="btn principal">Simuler</button>
+      </div>
+    </form>
+  </div>
+
+  <script src="formules.js"></script>
+  <script src="fonctions-aide.js"></script>
+  <script src="tableur.js"></script>
+</body>
+</html>

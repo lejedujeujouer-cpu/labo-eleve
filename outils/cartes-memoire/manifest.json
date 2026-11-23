@@ -1,0 +1,12 @@
+{
+  "id": "cartes-memoire",
+  "titre": "Cartes mémoire",
+  "description": "Crée tes flashcards (question au recto, réponse au verso) pour réviser ton cours, puis entraîne-toi : les cartes que tu connais bien reviennent moins souvent.",
+  "matiere": "documents",
+  "niveaux": ["cap1", "cap2", "2pro", "1pro", "tpro"],
+  "version": "1.0.0",
+  "icone": "icone.svg",
+  "couleur": "#7c3aed",
+  "motsCles": ["flashcard", "flashcards", "cartes", "mémoire", "réviser", "révision", "apprendre", "leçon", "quiz", "par cœur", "leitner"],
+  "entree": "index.html"
+}

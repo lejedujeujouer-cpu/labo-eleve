@@ -1,0 +1,19 @@
+{
+  "id": "traitement-de-texte",
+  "titre": "Traitement de texte",
+  "description": "Rédige tes comptes rendus : titres, listes, tableaux, images et symboles. Ouvre et enregistre les fichiers Word.",
+  "matiere": "bureautique",
+  "version": "2.3.0",
+  "icone": "icone.svg",
+  "couleur": "#1d4ed8",
+  "motsCles": [
+    "word",
+    "texte",
+    "compte rendu",
+    "rapport",
+    "rédaction",
+    "docx",
+    "document"
+  ],
+  "entree": "index.html"
+}

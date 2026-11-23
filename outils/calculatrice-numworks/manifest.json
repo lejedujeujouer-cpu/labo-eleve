@@ -1,0 +1,12 @@
+{
+  "id": "calculatrice-numworks",
+  "titre": "Calculatrice NumWorks",
+  "description": "Utilise l'émulateur de la calculatrice graphique NumWorks, téléchargé sur ton ordinateur.",
+  "matiere": "maths",
+  "niveaux": ["cap1", "cap2", "2pro", "1pro", "tpro"],
+  "version": "1.0.0",
+  "icone": "icone.svg",
+  "couleur": "#c2410c",
+  "motsCles": ["calculatrice", "numworks", "graphique", "calcul", "python", "émulateur"],
+  "entree": "index.html"
+}

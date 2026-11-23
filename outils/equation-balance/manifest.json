@@ -1,0 +1,31 @@
+{
+  "id": "equation-balance",
+  "titre": "Équations à la balance",
+  "description": "Résous une équation en gardant la balance en équilibre. Outil créé par Arnaud DURAND (mathix.org). Proposé dans le Labo de maths.",
+  "matiere": "maths",
+  "niveaux": [
+    "cap1",
+    "cap2",
+    "2pro",
+    "1pro",
+    "tpro"
+  ],
+  "version": "1.0.0",
+  "icone": "icone.svg",
+  "couleur": "#3498db",
+  "auteur": "Arnaud DURAND — mathix.org",
+  "licence": "GPL",
+  "source": "https://www.mathix.org/equation-anim/",
+  "motsCles": [
+    "équation",
+    "equation",
+    "balance",
+    "algèbre",
+    "inconnue",
+    "résoudre",
+    "premier degré",
+    "mathix"
+  ],
+  "entree": "index.html",
+  "interne": true
+}

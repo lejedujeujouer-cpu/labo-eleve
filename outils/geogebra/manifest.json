@@ -1,0 +1,12 @@
+{
+  "id": "geogebra",
+  "titre": "GeoGebra Classique",
+  "description": "Fonctions, géométrie, tableur et calcul formel avec GeoGebra, déjà installé sur ton ordinateur, ouvert directement dans Labo Élève.",
+  "matiere": "maths",
+  "niveaux": ["cap1", "cap2", "2pro", "1pro", "tpro"],
+  "version": "1.0.0",
+  "icone": "icone.svg",
+  "couleur": "#6557d2",
+  "motsCles": ["geogebra", "géométrie", "fonction", "courbe", "graphique", "construction", "tableur", "cas"],
+  "entree": "index.html"
+}

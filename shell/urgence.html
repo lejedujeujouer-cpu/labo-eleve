@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'">
+<title>Fermeture d'urgence</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 15px "Segoe UI", system-ui, sans-serif; background: #1a1f30; color: #eef1f8; display: flex; flex-direction: column; height: 100vh; padding: 22px 26px; }
+  h1 { font-size: 18px; margin: 0 0 8px; color: #ffb4a8; }
+  p { margin: 0 0 14px; color: #c6cbe0; line-height: 1.4; }
+  input { width: 100%; padding: 10px 12px; font: inherit; border-radius: 8px; border: 1px solid #4a5270; background: #0f1320; color: #fff; }
+  input:focus { outline: 2px solid #ff8a75; border-color: transparent; }
+  #message { min-height: 22px; margin: 8px 0 0; color: #ff9c8c; font-size: 14px; }
+  .boutons { display: flex; gap: 10px; justify-content: flex-end; margin-top: auto; }
+  button { padding: 9px 18px; font: inherit; border-radius: 8px; border: 0; cursor: pointer; }
+  #annuler { background: #2e3550; color: #eef1f8; }
+  #valider { background: #d9483b; color: #fff; font-weight: 600; }
+  button:disabled { opacity: .6; cursor: default; }
+</style>
+</head>
+<body>
+  <h1>🔒 Fermeture d'urgence (enseignant)</h1>
+  <p>Ferme Labo Élève immédiatement, même en mode examen ou en mode classe. Le travail non enregistré sera perdu.</p>
+  <form id="formulaire">
+    <input id="mdp" type="password" placeholder="Mot de passe enseignant" autocomplete="off" autofocus>
+    <div id="message"></div>
+  </form>
+  <div class="boutons">
+    <button id="annuler" type="button">Annuler</button>
+    <button id="valider" type="submit" form="formulaire">Fermer Labo Élève</button>
+  </div>
+<script src="urgence.js"></script>
+</body>
+</html>

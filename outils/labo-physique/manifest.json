@@ -1,0 +1,12 @@
+{
+  "id": "labo-physique",
+  "titre": "Labo de physique",
+  "description": "Manipulations virtuelles de physique (loi d'Ohm, masse volumique) : réalise le montage, suis ou construis le protocole, relève tes mesures et trace le graphique.",
+  "matiere": "physique-chimie",
+  "niveaux": ["cap1", "cap2", "2pro", "1pro", "tpro"],
+  "version": "0.2.0",
+  "icone": "icone.svg",
+  "couleur": "#c2410c",
+  "motsCles": ["physique", "labo", "laboratoire", "tp", "manipulation", "protocole", "électricité", "loi d'ohm", "résistance", "masse volumique", "mesure", "expérience"],
+  "entree": "index.html"
+}

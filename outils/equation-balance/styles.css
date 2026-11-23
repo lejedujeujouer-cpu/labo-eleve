@@ -1,0 +1,254 @@
+@font-face {
+    font-family: 'cursif';
+    src: url('font/cursif-webfont.eot');
+    src: url('font/cursif-webfont.eot?#iefix') format('embedded-opentype'),
+        url('font/cursif-webfont.woff2') format('woff2'),
+        url('font/cursif-webfont.woff') format('woff'),
+        url('font/cursif-webfont.ttf') format('truetype'),
+        url('font/cursif-webfont.svg#cursif') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}
+
+body {
+    display: grid;
+    grid-template-columns: auto 1fr auto 500px;
+    grid-template-rows: auto auto 1fr;
+    grid-gap: 20px;
+    padding: 20px;
+    background-color: #f5f7fa;
+    color: #2c3e50;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    user-select: none;
+    margin: 0;
+    min-height: 100vh;
+    box-sizing: border-box;
+    align-content: start;
+}
+
+
+#mon_canvas {
+    width: 100%;
+    max-width: 800px;
+    height: auto;
+    /*background: white;*/
+    border-radius: 15px;
+    /*box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);*/
+}
+
+#divcanvas {
+    grid-column: 2;
+    grid-row: 1;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: transparent;
+    border-radius: 0;
+    padding: 0;
+}
+
+
+
+#comgauche,
+#comdroite {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(2, auto);
+    gap: 10px;
+    padding: 10px;
+    align-self: center;
+}
+
+#comgauche {
+    grid-column: 1;
+    grid-row: 1;
+}
+
+#comdroite {
+    grid-column: 3;
+    grid-row: 1;
+}
+
+
+.btn-action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    border-radius: 12px;
+    padding: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
+    border: 2px solid transparent;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.btn-action:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    border-color: #3498db;
+}
+
+.btn-action:active {
+    transform: translateY(0);
+}
+
+.btn-action img {
+    height: 30px;
+    width: auto;
+}
+
+#op {
+    grid-column: 2;
+    grid-row: 2;
+    text-align: center;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    min-height: 80px;
+}
+
+
+#equation {
+    text-align: center;
+    font-family: 'cursif', cursive;
+    font-size: 26px;
+    grid-column: 4;
+    grid-row: 1 / 3;
+    background: white;
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.equation-actions {
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-start;
+    margin-bottom: 5px;
+    gap: 10px;
+}
+
+.btn-equation {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    font-size: 20px;
+    text-decoration: none;
+    color: #3498db;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.btn-equation:hover {
+    transform: translateY(-2px);
+    color: #2980b9;
+}
+
+.btn-equation img,
+.btn-equation span.icon {
+    font-size: 30px;
+    margin-bottom: 5px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+
+#equation h2 {
+    margin-top: 0;
+    color: #34495e;
+    font-size: 36px;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+
+#equation a {
+    color: #3498db;
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.2s;
+}
+
+#equation a:hover {
+    color: #2980b9;
+}
+
+#config {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    border: none;
+}
+
+.inputeq {
+    font-size: 24px;
+    width: 80px;
+    padding: 5px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    text-align: center;
+    font-family: 'cursif';
+}
+
+#liste-eq {
+    width: 100%;
+    border-collapse: separate;
+
+}
+
+
+#liste-eq td {
+
+    vertical-align: middle;
+    text-align: center;
+}
+
+#liste-eq td img{
+
+    vertical-align: middle;
+    
+}
+
+/* On crée une petite classe utilitaire pour l'alignement interne */
+.cell-content {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+}
+
+
+
+#msg {
+    grid-column: 1 / 5;
+    text-align: center;
+    padding: 10px;
+    font-size: 12px;
+    color: #7f8c8d;
+    position: static !important;
+}
+
+progress {
+    width: 100%;
+    height: 10px;
+    position: fixed;
+    top: 0;
+    left: 0;
+}

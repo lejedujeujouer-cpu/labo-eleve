@@ -1,0 +1,12 @@
+{
+  "id": "labo-chimie",
+  "titre": "Labo de chimie",
+  "description": "Manipulations virtuelles de chimie (pH, tests d'ions, dilution) : équipe-toi, suis ou construis le protocole, réalise les gestes et note tes mesures.",
+  "matiere": "physique-chimie",
+  "niveaux": ["cap1", "cap2", "2pro", "1pro", "tpro"],
+  "version": "0.2.0",
+  "icone": "icone.svg",
+  "couleur": "#0f766e",
+  "motsCles": ["chimie", "labo", "laboratoire", "tp", "manipulation", "protocole", "ph", "ions", "dilution", "solution", "expérience"],
+  "entree": "index.html"
+}

@@ -1,0 +1,33 @@
+# --- JAMAIS en ligne : clé privée de signature des mises à jour ---
+cles-signature/
+*.pem
+!signature-publique.pem
+*.pfx
+*.p12
+*.key
+
+# Fichiers construits ou téléchargés
+node_modules/
+installeur/
+kit-enseignant/
+paquets/
+natif/*.exe
+*.outil
+*.zip
+
+# Anciens éléments retirés, réglages locaux de l'éditeur
+archives/
+.claude/
+
+# Données locales éventuelles (élèves, classes, notes)
+*.csv
+*.xlsx
+config.json
+eleve.json
+professeurs.json
+
+# Système
+Thumbs.db
+desktop.ini
+.DS_Store
+*.log

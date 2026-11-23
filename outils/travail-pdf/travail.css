@@ -1,0 +1,88 @@
+/* Travail à rendre (PDF à compléter) */
+[hidden] { display: none !important; }
+body { margin: 0; height: 100vh; display: flex; flex-direction: column; background: var(--fond); color: var(--texte); font-family: "Segoe UI", system-ui, sans-serif; }
+.barre { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 8px 14px; background: var(--surface); border-bottom: 1px solid var(--bord); }
+.titre { display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1; }
+.titre .ic { font-size: 24px; }
+.titre b { display: block; font-size: 16px; }
+.titre small { display: block; color: var(--texte-doux); font-size: 12.5px; }
+.actions { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.actions .btn { padding: 6px 12px; font-size: 13.5px; }
+.btn.principal { background: #0d9488; border-color: #0d9488; color: #fff; }
+.btn.actif { background: color-mix(in srgb, #0d9488 16%, var(--surface)); border-color: #0d9488; }
+.btn.danger { color: #c0392b; }
+.etat { font-size: 12.5px; color: var(--texte-doux); }
+.etat.alerte { color: #b45309; font-weight: 600; }
+.etat.ok { color: #15803d; }
+.sep { width: 1px; height: 24px; background: var(--bord); }
+.groupe-boutons { display: inline-flex; border: 1px solid var(--bord); border-radius: 9px; overflow: hidden; }
+.groupe-boutons .btn { border: 0; border-radius: 0; }
+.champ-nom { font: inherit; font-size: 13.5px; padding: 5px 8px; border-radius: 8px; border: 1px solid var(--bord); background: var(--surface); color: var(--texte); width: 170px; }
+
+.corps { flex: 1; min-height: 0; display: flex; }
+.cote { width: 290px; flex: 0 0 290px; border-right: 1px solid var(--bord); background: var(--surface); overflow: auto; padding: 12px; }
+.principal { flex: 1; min-width: 0; overflow: auto; padding: 16px; }
+.info { max-width: 900px; margin: 0 auto 12px; padding: 10px 14px; border-radius: 12px; font-size: 14px; background: color-mix(in srgb, #0d9488 9%, var(--surface)); border: 1px solid color-mix(in srgb, #0d9488 35%, var(--bord)); }
+.info.rendu { background: color-mix(in srgb, #16a34a 10%, var(--surface)); border-color: color-mix(in srgb, #16a34a 40%, var(--bord)); }
+.chargement, .erreur-chargement { text-align: center; color: var(--texte-doux); padding: 40px; }
+.erreur-chargement { color: #c0392b; }
+
+/* Pages du PDF et cases */
+.pages { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+.page { position: relative; background: #fff; box-shadow: 0 2px 12px rgba(20, 30, 60, .18); }
+.page canvas { display: block; width: 100%; height: 100%; }
+.page .num-page { position: absolute; right: -40px; top: 0; font-size: 12px; color: var(--texte-doux); }
+.calque { position: absolute; inset: 0; }
+.mode-edition .calque { cursor: crosshair; }
+.champ { position: absolute; box-sizing: border-box; }
+.champ input[type=text], .champ textarea { width: 100%; height: 100%; box-sizing: border-box; border: 1.5px solid rgba(13, 148, 136, .55); background: rgba(204, 251, 241, .55); color: #0b2b5c; font-family: "Segoe UI", Arial, sans-serif; padding: 0 3px; border-radius: 3px; resize: none; outline: none; }
+.champ textarea { padding: 2px 3px; line-height: 1.25; }
+.champ input:focus, .champ textarea:focus { background: rgba(255, 255, 255, .95); border-color: #0d9488; box-shadow: 0 0 0 2px rgba(13, 148, 136, .25); }
+.champ input:disabled, .champ textarea:disabled { background: rgba(240, 240, 240, .6); border-style: dashed; color: #0b2b5c; }
+.champ.case { display: grid; place-items: center; }
+.champ.case input { width: 85%; height: 85%; margin: 0; accent-color: #0d9488; cursor: pointer; }
+/* édition par l'enseignant */
+.mode-edition .champ { border: 2px solid #0d9488; background: rgba(13, 148, 136, .14); cursor: move; }
+.mode-edition .champ.zone { background: rgba(37, 99, 235, .12); border-color: #2563eb; }
+.mode-edition .champ.case { background: rgba(234, 88, 12, .14); border-color: #ea580c; }
+.mode-edition .champ.choisi { outline: 3px solid #f59e0b; outline-offset: 1px; z-index: 2; }
+.mode-edition .champ .etiquette { position: absolute; left: 0; top: -15px; font-size: 10.5px; font-weight: 700; color: #fff; background: #0d9488; padding: 0 4px; border-radius: 3px; white-space: nowrap; pointer-events: none; }
+.mode-edition .champ.zone .etiquette { background: #2563eb; }
+.mode-edition .champ.case .etiquette { background: #ea580c; }
+.mode-edition .champ .poignee { position: absolute; right: -5px; bottom: -5px; width: 10px; height: 10px; background: #f59e0b; border: 1px solid #fff; border-radius: 2px; cursor: nwse-resize; }
+.rectangle-trace { position: absolute; border: 2px dashed #0d9488; background: rgba(13, 148, 136, .1); pointer-events: none; }
+/* suivi : copie d'un élève (lecture seule) */
+.valeur { width: 100%; height: 100%; box-sizing: border-box; border: 1px dashed rgba(13, 148, 136, .6); background: rgba(204, 251, 241, .35); color: #0b2b5c; font-family: "Segoe UI", Arial, sans-serif; padding: 0 3px; overflow: hidden; white-space: pre-wrap; line-height: 1.2; border-radius: 3px; }
+.valeur.vide { background: rgba(254, 226, 226, .35); border-color: rgba(220, 38, 38, .45); }
+.valeur.case { display: grid; place-items: center; font-weight: 800; color: #0d9488; }
+.champ.recent .valeur { animation: recent 1.6s ease-in-out 3; border-color: #f59e0b; }
+.champ.montre .valeur { outline: 3px solid #f59e0b; }
+@keyframes recent { 50% { background: rgba(253, 230, 138, .9); } }
+
+/* Côté (suivi) */
+.resume { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 10px; }
+.resume div { background: var(--surface-2); border: 1px solid var(--bord); border-radius: 10px; padding: 6px; text-align: center; font-size: 11.5px; color: var(--texte-doux); }
+.resume b { display: block; font-size: 18px; color: var(--texte); }
+.liste-eleves { display: flex; flex-direction: column; gap: 4px; }
+.liste-eleves button { display: grid; grid-template-columns: 20px 1fr auto; gap: 6px; align-items: center; text-align: left; padding: 7px 8px; border: 1px solid transparent; border-radius: 9px; background: none; color: var(--texte); font: inherit; font-size: 13.5px; cursor: pointer; }
+.liste-eleves button:hover { background: var(--surface-2); }
+.liste-eleves button.choisi { background: color-mix(in srgb, #0d9488 12%, var(--surface)); border-color: color-mix(in srgb, #0d9488 45%, var(--bord)); }
+.liste-eleves .detail { font-size: 11.5px; color: var(--texte-doux); text-align: right; }
+.liste-eleves .actif .detail { color: #0d9488; font-weight: 700; }
+.onglets { display: flex; gap: 4px; max-width: 900px; margin: 0 auto 12px; border-bottom: 1px solid var(--bord); }
+.onglets button { border: 0; background: none; padding: 8px 14px; font: inherit; font-weight: 600; color: var(--texte-doux); cursor: pointer; border-bottom: 3px solid transparent; }
+.onglets button.actif { color: #0d9488; border-bottom-color: #0d9488; }
+.vue-annexe { max-width: 1000px; margin: 0 auto; }
+.historique { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.historique li { display: grid; grid-template-columns: 70px 150px 1fr; gap: 10px; align-items: baseline; padding: 7px 10px; background: var(--surface); border: 1px solid var(--bord); border-radius: 9px; font-size: 13.5px; cursor: pointer; }
+.historique li:hover { border-color: #0d9488; }
+.historique .heure { font-variant-numeric: tabular-nums; color: var(--texte-doux); }
+.historique .avant { color: #b42318; text-decoration: line-through; }
+.historique .apres { color: #15803d; font-weight: 600; }
+.historique li.evenement { background: color-mix(in srgb, #0d9488 9%, var(--surface)); font-weight: 600; }
+.tableau-reponses { overflow: auto; }
+.tableau-reponses table { border-collapse: collapse; font-size: 13px; background: var(--surface); }
+.tableau-reponses th, .tableau-reponses td { border: 1px solid var(--bord); padding: 5px 8px; max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tableau-reponses th { background: var(--surface-2); position: sticky; top: 0; }
+.tableau-reponses td.vide { background: color-mix(in srgb, #dc2626 6%, var(--surface)); }
+.aide-edition { max-width: 900px; margin: 0 auto 12px; font-size: 13.5px; color: var(--texte-doux); }

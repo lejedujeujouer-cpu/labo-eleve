@@ -1,0 +1,93 @@
+{
+  "name": "labo-eleve",
+  "productName": "Labo Élève",
+  "version": "1.1.0",
+  "description": "Boîte à outils interactifs de mathématiques et de physique-chimie pour les élèves",
+  "main": "main.js",
+  "author": "Enseignant",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "paquet": "node scripts/creer-paquet.js",
+    "installeur": "npm run installeur:eleve && npm run installeur:prof",
+    "installeur:eleve": "electron-builder --win",
+    "installeur:prof": "electron-builder --win --config electron-builder-prof.js",
+    "start:prof": "electron . --prof",
+    "publier": "node scripts/publier-maj.js",
+    "cles": "node scripts/cles.js creer",
+    "test-prof": "electron . --prof --test",
+    "test-eleve": "electron . --test",
+    "kit": "node scripts/kit-enseignant.js",
+    "envoyer": "node scripts/envoyer-modifications.js",
+    "examiner": "node scripts/examiner-modifications.js"
+  },
+  "dependencies": {
+    "adm-zip": "0.6.1"
+  },
+  "devDependencies": {
+    "electron": "45.2.3",
+    "electron-builder": "26.18.1"
+  },
+  "build": {
+    "appId": "fr.ecole.labo-eleve",
+    "productName": "Labo Élève",
+    "files": [
+      "main.js",
+      "mode-classe.js",
+      "espace-classes.js",
+      "suivi.js",
+      "office.js",
+      "preload.js",
+      "preload-urgence.js",
+      "shell/**",
+      "commun/**",
+      "outils/**",
+      "classeur-xlsx.js", "liste-eleves.js",
+      "evaluations.js",
+      "signature.js",
+      "signature-publique.pem",
+      "package.json"
+    ],
+    "directories": {
+      "output": "installeur"
+    },
+    "fileAssociations": [
+      {
+        "ext": "outil",
+        "name": "Outil Labo Élève",
+        "description": "Nouvel outil pour Labo Élève"
+      }
+    ],
+    "win": {
+      "signAndEditExecutable": false,
+      "target": [
+        "nsis",
+        "portable"
+      ],
+      "icon": "shell/icones/eleve.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": true,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "shortcutName": "Labo Élève",
+      "installerIcon": "shell/icones/eleve.ico",
+      "uninstallerIcon": "shell/icones/eleve.ico"
+    },
+    "portable": {
+      "artifactName": "Labo-Eleve-portable-${version}.exe"
+    },
+    "extraMetadata": {
+      "edition": "eleve"
+    },
+    "extraResources": [
+      {
+        "from": "natif/verrou-clavier.exe",
+        "to": "verrou-clavier.exe"
+      }
+    ],
+    "afterPack": "scripts/icone-exe.js"
+  }
+}

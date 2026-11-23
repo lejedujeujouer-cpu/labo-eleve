@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title>Calculatrice NumWorks</title>
+  <link rel="stylesheet" href="../../commun/outil.css">
+  <script src="../../commun/outil.js"></script>
+  <style>
+    body { overflow-y: auto; }
+    .page { min-height: 100vh; display: grid; place-items: center; padding: 32px 20px; }
+    .carte { width: min(720px, 100%); background: var(--surface); border: 1px solid var(--bord); border-radius: 22px; box-shadow: var(--ombre); padding: 30px 34px; }
+    .entete { display: flex; gap: 16px; align-items: center; margin-bottom: 8px; }
+    .entete .tuile { width: 56px; height: 56px; border-radius: 16px; display: grid; place-items: center; background: linear-gradient(140deg, #ea7a3c, #c2410c); flex: none; }
+    .entete .tuile img { width: 34px; height: 34px; }
+    h1 { font-size: 23px; }
+    .intro { color: var(--texte-doux); margin: 0 0 22px; font-size: 14.5px; }
+    ol.etapes { list-style: none; padding: 0; margin: 0 0 22px; display: flex; flex-direction: column; gap: 14px; }
+    ol.etapes li { display: grid; grid-template-columns: 34px 1fr; gap: 14px; align-items: start; background: var(--surface-2); border: 1px solid var(--bord); border-radius: 14px; padding: 14px 16px; }
+    .num { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; font-weight: 750; color: #fff; background: var(--accent); }
+    ol.etapes b { display: block; font-size: 15px; margin-bottom: 3px; }
+    ol.etapes p { margin: 0 0 10px; color: var(--texte-doux); font-size: 13.5px; }
+    .etat { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-radius: 12px; font-weight: 600; font-size: 14px; background: color-mix(in srgb, var(--accent) 10%, transparent); color: var(--accent); }
+    .etat.ok { background: color-mix(in srgb, var(--c3) 14%, transparent); color: var(--c3); }
+    .etat.erreur { background: color-mix(in srgb, var(--c2) 12%, transparent); color: var(--c2); }
+    .roue { width: 16px; height: 16px; border-radius: 50%; border: 2.5px solid currentColor; border-right-color: transparent; animation: tourne .9s linear infinite; flex: none; }
+    .etat.ok .roue, .etat.erreur .roue { display: none; }
+    @keyframes tourne { to { transform: rotate(360deg); } }
+    .mention { margin: 18px 0 0; font-size: 12.5px; color: var(--texte-doux); }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="carte">
+      <div class="entete">
+        <div class="tuile"><img src="icone.svg" alt=""></div>
+        <div>
+          <h1>Calculatrice NumWorks</h1>
+        </div>
+      </div>
+      <p class="intro">Pour utiliser la calculatrice dans Labo Élève, télécharge d'abord l'émulateur gratuit sur le site officiel de NumWorks. L'application le trouvera ensuite toute seule sur ton ordinateur.</p>
+
+      <ol class="etapes">
+        <li>
+          <span class="num">1</span>
+          <div>
+            <b>Télécharge l'émulateur</b>
+            <p>Le site de NumWorks s'ouvre dans ton navigateur : clique sur « Télécharger l'émulateur ». Le fichier arrive dans ton dossier Téléchargements.</p>
+            <button class="btn principal" id="btn-site">Ouvrir le site de NumWorks</button>
+          </div>
+        </li>
+        <li>
+          <span class="num">2</span>
+          <div>
+            <b>Reviens ici</b>
+            <p>Dès que le fichier est téléchargé, la calculatrice s'ouvre automatiquement. Tu n'as même pas besoin de le dézipper.</p>
+            <div class="boutons">
+              <button class="btn" id="btn-chercher">Rechercher maintenant</button>
+              <button class="btn" id="btn-choisir">Choisir le fichier moi-même…</button>
+            </div>
+          </div>
+        </li>
+      </ol>
+
+      <div class="etat" id="etat"><span class="roue"></span><span id="etat-texte">Recherche de l'émulateur sur ton ordinateur…</span></div>
+
+      <p class="mention">L'émulateur est un logiciel de NumWorks, qui n'est pas fourni avec Labo Élève. Tu le télécharges toi-même sur leur site, et son utilisation est soumise aux conditions d'utilisation de NumWorks.</p>
+    </div>
+  </div>
+
+  <script>
+    const PAGE_TELECHARGEMENT = 'https://www.numworks.com/fr/emulateur/graphique/telecharger/';
+    const EMULATEUR = 'app://externe/numworks/emulateur.html';
+    const api = window.parent && window.parent.labo && window.parent.labo.numworks;
+    const etat = document.getElementById('etat');
+    const texte = document.getElementById('etat-texte');
+    let minuterie = null;
+
+    function afficher(message, classe = '') {
+      etat.className = 'etat ' + classe;
+      texte.textContent = message;
+    }
+    function ouvrirCalculatrice() {
+      clearInterval(minuterie);
+      afficher('Calculatrice trouvée ! Ouverture…', 'ok');
+      setTimeout(() => location.replace(EMULATEUR), 600);
+    }
+    async function chercher(manuel) {
+      const r = await api.chercher();
+      if (r.ok) return ouvrirCalculatrice();
+      afficher(manuel ? 'Pas encore trouvée. Vérifie que le téléchargement est terminé.' : 'En attente du téléchargement…', manuel ? 'erreur' : '');
+    }
+
+    document.getElementById('btn-site').addEventListener('click', () => window.open(PAGE_TELECHARGEMENT));
+    document.getElementById('btn-chercher').addEventListener('click', () => chercher(true));
+    document.getElementById('btn-choisir').addEventListener('click', async () => {
+      const r = await api.choisir();
+      if (r.ok) ouvrirCalculatrice();
+      else if (!r.annule) afficher(r.message, 'erreur');
+    });
+
+    (async () => {
+      if (!api) return afficher('Cette page doit être ouverte depuis Labo Élève.', 'erreur');
+      const e = await api.etat();
+      if (e.installe) return location.replace(EMULATEUR);
+      await chercher(false);
+      // Vérifie régulièrement : la calculatrice s'ouvre dès que le téléchargement est fini.
+      minuterie = setInterval(() => chercher(false), 3000);
+    })();
+  </script>
+</body>
+</html>

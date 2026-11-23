@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title>Mes documents</title>
+  <link rel="stylesheet" href="../../commun/outil.css">
+  <script src="../../commun/outil.js"></script>
+  <link rel="stylesheet" href="documents.css">
+</head>
+<body>
+  <!-- Liste des documents -->
+  <div id="vue-liste" class="vue-liste">
+    <header class="entete-docs">
+      <div>
+        <h1>Mes documents</h1>
+        <p class="note">Les documents téléchargés depuis les pads de ton professeur arrivent ici.</p>
+      </div>
+      <div class="boutons">
+        <button class="btn principal" id="btn-nouveau-texte">📝 Nouveau document</button>
+        <button class="btn principal" id="btn-nouveau-tableau">📊 Nouveau tableau</button>
+        <button class="btn" id="btn-importer">+ Ajouter un document</button>
+        <button class="btn" id="btn-dossier">Ouvrir le dossier</button>
+      </div>
+    </header>
+    <div id="liste" class="liste-docs"></div>
+    <div id="vide" class="vide-docs" hidden>
+      <div class="vide-icone">📂</div>
+      <h2>Aucun document pour l'instant</h2>
+      <p>Ouvre un pad de ton professeur (carte « Documents du cours ») et télécharge un document : il apparaîtra ici.</p>
+    </div>
+  </div>
+
+  <!-- Lecteur / annotation -->
+  <div id="vue-lecteur" class="vue-lecteur" hidden>
+    <header class="barre-lecteur">
+      <button class="btn" id="btn-retour">← Mes documents</button>
+      <span class="nom-doc" id="nom-doc"></span>
+      <span class="etat-enregistrement" id="etat-enregistrement"></span>
+      <button class="btn principal" id="btn-enregistrer">💾 Enregistrer</button>
+    </header>
+    <p class="astuce" id="astuce">Pour écrire sur le PDF, utilise les outils en haut à droite : <b>T</b> pour ajouter du texte, le <b>crayon</b> pour dessiner, le <b>surligneur</b>, ou <b>l'image</b>. Puis clique sur « Enregistrer ».</p>
+    <iframe id="lecteur" title="Document"></iframe>
+    <div id="apercu-autre" class="apercu-autre" hidden></div>
+  </div>
+
+  <script src="../../commun/document.js"></script>
+  <script src="documents.js"></script>
+</body>
+</html>

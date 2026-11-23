@@ -1,0 +1,20 @@
+{
+  "id": "aire-disque",
+  "titre": "Aire et périmètre d'un disque",
+  "description": "Modèle d'outil : fais varier le rayon et observe l'aire et le périmètre.",
+  "matiere": "maths",
+  "niveaux": [
+    "cap1",
+    "cap2"
+  ],
+  "version": "1.1.0",
+  "icone": "⭕",
+  "couleur": "#8b5cf6",
+  "motsCles": [
+    "cercle",
+    "pi",
+    "aire",
+    "périmètre"
+  ],
+  "entree": "index.html"
+}

@@ -1,0 +1,11 @@
+{
+  "id": "powerpoint-en-ligne",
+  "titre": "PowerPoint en ligne",
+  "description": "Le vrai PowerPoint de Microsoft, dans Labo Élève, pour tes exposés. Avec ton compte de l'établissement.",
+  "matiere": "bureautique",
+  "version": "1.0.0",
+  "icone": "icone.svg",
+  "couleur": "#c43e1c",
+  "office": "powerpoint",
+  "motsCles": ["powerpoint", "office", "microsoft 365", "office 365", "diaporama", "exposé", "présentation"]
+}

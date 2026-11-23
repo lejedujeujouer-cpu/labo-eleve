@@ -1,0 +1,26 @@
+{
+  "id": "tableau-periodique",
+  "titre": "Tableau périodique",
+  "description": "Les éléments, leur atome (protons, neutrons, électrons, couches K, L, M), les ions courants et le calcul de masse molaire.",
+  "matiere": "physique-chimie",
+  "niveaux": [
+    "cap1",
+    "cap2",
+    "2pro",
+    "1pro",
+    "tpro"
+  ],
+  "version": "2.0.0",
+  "icone": "icone.svg",
+  "couleur": "#12a37a",
+  "motsCles": [
+    "élément",
+    "atome",
+    "masse molaire",
+    "couches électroniques",
+    "ion",
+    "octet",
+    "chimie"
+  ],
+  "entree": "index.html"
+}

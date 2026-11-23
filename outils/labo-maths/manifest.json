@@ -1,0 +1,12 @@
+{
+  "id": "labo-maths",
+  "titre": "Labo de maths",
+  "description": "Explore des notions de maths en faisant bouger des curseurs : fonction affine, Pythagore, fréquence et probabilité… avec des questions pour comprendre par toi-même.",
+  "matiere": "maths",
+  "niveaux": ["cap1", "cap2", "2pro", "1pro", "tpro"],
+  "version": "0.2.0",
+  "icone": "icone.svg",
+  "couleur": "#5865f2",
+  "motsCles": ["maths", "labo", "exploration", "fonction", "affine", "pythagore", "probabilité", "fréquence", "simulation", "curseur"],
+  "entree": "index.html"
+}

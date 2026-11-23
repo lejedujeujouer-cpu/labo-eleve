@@ -1,0 +1,28 @@
+{
+  "id": "python",
+  "titre": "Python",
+  "description": "Apprendre à programmer en Python : éditeur, console, tortue, exemples et exercices corrigés automatiquement. Fonctionne sans Internet.",
+  "matiere": "maths",
+  "niveaux": [
+    "cap1",
+    "cap2",
+    "2pro",
+    "1pro",
+    "tpro"
+  ],
+  "version": "1.0.0",
+  "icone": "icone.svg",
+  "couleur": "#3572a5",
+  "motsCles": [
+    "python",
+    "programmation",
+    "algorithme",
+    "algorithmique",
+    "code",
+    "boucle",
+    "fonction",
+    "tortue",
+    "turtle"
+  ],
+  "entree": "index.html"
+}

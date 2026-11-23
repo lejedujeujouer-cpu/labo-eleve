@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Labo Élève</title>
+  <link rel="stylesheet" href="shell.css">
+</head>
+<body>
+  <div class="fond-deco" aria-hidden="true"><span></span><span></span><span></span></div>
+
+  <!-- ====== Identification de l'élève ====== -->
+  <div id="choix-eleve" class="vue" hidden>
+    <div class="choix-contenu">
+      <div class="marque marque-centre">
+        <svg class="logo" viewBox="0 0 40 40" aria-hidden="true">
+          <defs><linearGradient id="lg3" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6d7cff"/><stop offset="1" stop-color="#22c3a6"/></linearGradient></defs>
+          <rect x="2" y="2" width="36" height="36" rx="11" fill="url(#lg3)"/>
+          <path d="M15 10h10M17 10v8l-6 11a2 2 0 0 0 1.8 3h14.4a2 2 0 0 0 1.8-3l-6-11v-8" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="18" cy="26" r="1.6" fill="#fff"/><circle cx="23" cy="23.5" r="1.2" fill="#fff"/>
+        </svg>
+        <div class="nom">Labo Élève</div>
+      </div>
+      <h1 class="titre-choix" id="eleve-titre">Bonjour ! Quelle est ta classe ?</h1>
+      <p class="sous-choix" id="eleve-sous-titre">Choisis ta classe, puis ton nom.</p>
+      <div id="eleve-continuer"></div>
+      <input type="search" id="recherche-eleve" class="recherche-eleve" placeholder="Cherche ton nom…" hidden autocomplete="off">
+      <div id="eleve-choix" class="niveaux"></div>
+      <button id="btn-eleve-retour" class="lien retour-choix" hidden>← Changer de classe</button>
+      <button id="btn-sans-classe" class="lien">Continuer sans classe (voir tous les outils)</button>
+    </div>
+  </div>
+
+  <!-- ====== Choix du niveau ====== -->
+  <div id="choix-niveau" class="vue" hidden>
+    <div class="choix-contenu">
+      <div class="marque marque-centre">
+        <svg class="logo" viewBox="0 0 40 40" aria-hidden="true">
+          <defs>
+            <linearGradient id="lg2" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#6d7cff"/><stop offset="1" stop-color="#22c3a6"/>
+            </linearGradient>
+          </defs>
+          <rect x="2" y="2" width="36" height="36" rx="11" fill="url(#lg2)"/>
+          <path d="M15 10h10M17 10v8l-6 11a2 2 0 0 0 1.8 3h14.4a2 2 0 0 0 1.8-3l-6-11v-8" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="18" cy="26" r="1.6" fill="#fff"/><circle cx="23" cy="23.5" r="1.2" fill="#fff"/>
+        </svg>
+        <div class="nom">Labo Élève</div>
+      </div>
+      <h1 class="titre-choix">Bienvenue ! En quelle classe es-tu ?</h1>
+      <p class="sous-choix">Choisis ton niveau pour voir les outils qui te correspondent. Tu pourras le changer à tout moment.</p>
+      <div id="niveaux" class="niveaux"></div>
+      <button id="btn-tous-niveaux" class="lien">Voir tous les outils, sans choisir de niveau</button>
+    </div>
+  </div>
+
+  <!-- ====== Accueil ====== -->
+  <div id="accueil" class="vue" hidden>
+    <header class="entete">
+      <div class="marque">
+        <svg class="logo" viewBox="0 0 40 40" aria-hidden="true">
+          <defs>
+            <linearGradient id="lg" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#6d7cff"/><stop offset="1" stop-color="#22c3a6"/>
+            </linearGradient>
+          </defs>
+          <rect x="2" y="2" width="36" height="36" rx="11" fill="url(#lg)"/>
+          <path d="M15 10h10M17 10v8l-6 11a2 2 0 0 0 1.8 3h14.4a2 2 0 0 0 1.8-3l-6-11v-8" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="18" cy="26" r="1.6" fill="#fff"/><circle cx="23" cy="23.5" r="1.2" fill="#fff"/>
+        </svg>
+        <div>
+          <div class="nom">Labo Élève</div>
+          <div class="sous-titre">Outils de maths &amp; physique-chimie</div>
+        </div>
+      </div>
+      <label class="recherche">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+        <input id="recherche" type="search" placeholder="Rechercher un outil…" autocomplete="off">
+      </label>
+      <div class="actions">
+        <button class="indicateur-classe" data-ouvrir-classe hidden title="Espace enseignant">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+          Mode classe
+        </button>
+        <button class="bouton-terminer" data-terminer hidden title="Terminer et fermer Labo Élève"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v8"/><path d="M6.3 7.5a8 8 0 1 0 11.4 0"/></svg>Terminer</button>
+        <button id="btn-examen-code" class="bouton-prof" hidden title="Réservé au professeur : démarrer l'examen sur cet ordinateur avec le code (fonctionne sans réseau)">🎓 Examen</button>
+        <button id="btn-espace-prof" class="bouton-prof" title="Espace professeur : classes, élèves, documents">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11v5c0 1.5 2.7 3 6 3s6-1.5 6-3v-5"/><path d="M22 9v6"/></svg>
+          Espace professeur
+        </button>
+        <button id="btn-theme" class="icone-btn" title="Changer de thème" aria-label="Changer de thème"></button>
+        <button id="btn-reglages" class="icone-btn" title="Ajouter des outils et mises à jour" aria-label="Réglages">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <div class="bandeau-examen" id="bandeau-examen" hidden></div>
+
+    <section class="bandeau">
+      <h1 id="salutation">Bonjour !</h1>
+      <p>Choisis un outil pour explorer, manipuler et comprendre.</p>
+      <button id="btn-niveau" class="puce-niveau" title="Changer de niveau">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11v5c0 1.5 2.7 3 6 3s6-1.5 6-3v-5"/></svg>
+        <span id="niveau-actuel"></span>
+        <span class="changer">Changer</span>
+      </button>
+    </section>
+
+    <section id="ma-classe" class="ma-classe" hidden></section>
+
+    <nav id="filtres" class="filtres" aria-label="Filtrer par matière"></nav>
+
+    <main id="grille" class="grille"></main>
+    <p id="vide" class="vide" hidden>Aucun outil ne correspond à ta recherche.</p>
+  </div>
+
+  <!-- ====== Espace professeur ====== -->
+  <div id="espace-prof" class="vue" hidden>
+    <header class="barre-outil">
+      <button id="btn-prof-retour" class="retour">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+        Accueil
+      </button>
+      <div class="titre-outil">Espace professeur</div>
+      <div class="actions">
+        <button id="btn-prof-profil" class="lien" hidden title="Ton nom affiché aux élèves et ta matière">👤 Mon profil</button>
+        <button id="btn-prof-mdp" class="lien" hidden>Changer le mot de passe</button>
+        <button id="btn-prof-verrouiller" class="secondaire" hidden>🔒 Verrouiller</button>
+      </div>
+    </header>
+    <div class="prof-corps" id="prof-corps"></div>
+  </div>
+
+  <!-- Petite fenêtre de saisie de l'espace professeur -->
+  <dialog id="dlg-saisie" class="dialogue">
+    <form method="dialog" class="dialogue-contenu" id="form-saisie">
+      <header><h2 id="saisie-titre"></h2></header>
+      <div id="saisie-champs" class="saisie-champs"></div>
+      <p class="aide-code erreur" id="saisie-erreur"></p>
+      <div class="rangee fin">
+        <button type="button" class="secondaire" id="saisie-annuler">Annuler</button>
+        <button type="submit" class="principal" id="saisie-valider">Valider</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- ====== Vue d'un outil ====== -->
+  <div id="vue-outil" class="vue" hidden>
+    <header class="barre-outil">
+      <button id="btn-retour" class="retour">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+        <span id="btn-retour-texte">Accueil</span>
+      </button>
+      <div class="titre-outil">
+        <span id="outil-icone" class="mini-icone"></span>
+        <span id="outil-titre"></span>
+        <span id="outil-auteur" class="auteur-outil"></span>
+        <span class="badge-examen" id="badge-examen" hidden>🎓 Mode examen</span>
+      </div>
+      <div class="actions">
+        <button class="indicateur-classe" data-ouvrir-classe hidden title="Espace enseignant">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+          Mode classe
+        </button>
+        <button class="bouton-terminer" data-terminer hidden title="Terminer et fermer Labo Élève"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v8"/><path d="M6.3 7.5a8 8 0 1 0 11.4 0"/></svg>Terminer</button>
+        <button id="btn-nouvelle-recherche" class="retour" hidden title="Revenir à la page de recherche"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>Nouvelle recherche</button>
+        <button id="btn-precedent" class="retour" hidden title="Revenir à la page précédente (ex. le Médiacentre)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>Page précédente</button>
+        <button id="btn-cote-a-cote" class="retour" title="Ouvrir un deuxième outil à côté (par ex. la consigne à gauche, le tableur à droite)"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M12 4v16"/></svg>Côte à côte</button>
+        <button id="btn-recharger" class="icone-btn" title="Recommencer" aria-label="Recommencer">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg>
+        </button>
+        <button id="btn-plein-ecran" class="icone-btn" title="Plein écran (F11)" aria-label="Plein écran">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
+        </button>
+      </div>
+    </header>
+    <div class="zone-volets" id="zone-volets">
+      <div class="volet" id="volet1">
+        <iframe id="cadre" title="Outil"></iframe>
+        <!-- Office en ligne : navigateur intégré (sites Microsoft uniquement, voir office.js) -->
+        <webview id="cadre-office" partition="persist:office365" allowpopups hidden></webview>
+      </div>
+      <div class="separateur-volets" id="separateur-volets" hidden title="Faire glisser pour changer la largeur"></div>
+      <div class="volet" id="volet2" hidden>
+        <div class="barre-volet2">
+          <span id="volet2-icone" class="mini-icone"></span><span id="volet2-titre" class="titre-volet2"></span>
+          <span class="espace"></span>
+          <button class="lien" id="btn-volet2-changer" title="Choisir un autre outil pour ce côté">Changer</button>
+          <button class="icone-btn" id="btn-volet2-inverser" title="Inverser les deux côtés" aria-label="Inverser les deux côtés"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h13l-3-3M17 17H4l3 3"/></svg></button>
+          <button class="icone-btn" id="btn-volet2-fermer" title="Fermer ce côté" aria-label="Fermer ce côté"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+        </div>
+        <iframe id="cadre2" title="Deuxième outil"></iframe>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== Choix de l'outil du deuxième côté ====== -->
+  <dialog id="dlg-volet2" class="dialogue">
+    <form method="dialog" class="dialogue-contenu">
+      <header>
+        <h2>Ouvrir à côté</h2>
+        <button class="icone-btn" value="fermer" aria-label="Fermer"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+      </header>
+      <p class="note-volet2">Choisis l'outil ou le document à afficher à droite de « <b id="volet2-principal"></b> ».</p>
+      <div class="choix-volet2" id="choix-volet2"></div>
+    </form>
+  </dialog>
+
+  <!-- ====== Réglages / ajout d'outils ====== -->
+  <dialog id="dlg-reglages" class="dialogue">
+    <form method="dialog" class="dialogue-contenu">
+      <header>
+        <h2>Ajouter et mettre à jour des outils</h2>
+        <button class="icone-btn" value="fermer" aria-label="Fermer">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+        </button>
+      </header>
+
+      <section>
+        <h3>Ajouter un nouvel outil</h3>
+        <p>Choisis un fichier <code>.outil</code> fourni par ton professeur. Tu peux aussi simplement double-cliquer sur ce fichier.</p>
+        <div class="rangee">
+          <button type="button" id="btn-importer" class="principal">Choisir un fichier .outil</button>
+          <button type="button" id="btn-importer-dossier" class="secondaire">Depuis un dossier</button>
+        </div>
+      </section>
+
+      <section>
+        <h3>Dossier partagé de l'établissement</h3>
+        <p>Le dossier commun du lycée (lecteur réseau, ENT synchronisé…) où le professeur dépose les nouveaux outils, ses classes et ses documents. Indique-le ici : l'application y cherche les nouveautés à chaque démarrage, et les élèves y trouvent leur classe.</p>
+        <div class="chemin" id="chemin-maj">Aucun dossier choisi</div>
+        <div class="rangee">
+          <button type="button" id="btn-choisir-maj" class="secondaire">Choisir le dossier</button>
+          <button type="button" id="btn-verifier-maj" class="principal">Vérifier maintenant</button>
+          <button type="button" id="btn-oublier-maj" class="lien">Retirer</button>
+        </div>
+      </section>
+
+      <section>
+        <h3>Version de l'application</h3>
+        <p id="version-appli">…</p>
+        <div class="rangee"><button type="button" id="btn-maj-appli" class="principal" hidden>Installer la nouvelle version</button></div>
+      </section>
+
+      <section>
+        <h3>Ajouter un Digipad (enseignant)</h3>
+        <p>Colle le lien de ton pad : il s'affichera dans Labo Élève, et les documents téléchargés par les élèves iront dans « Mes documents ». Le pad reste accessible en mode classe.</p>
+        <div class="formulaire-pad">
+          <input type="text" id="pad-titre" placeholder="Titre de la carte (ex. Chimie – Chapitre 3)">
+          <input type="url" id="pad-lien" placeholder="Lien du pad (https://digipad.app/p/…)">
+          <input type="text" id="pad-description" placeholder="Description (facultatif)">
+          <div class="pad-niveaux" id="pad-niveaux">
+            <label><input type="checkbox" value="cap1"> CAP 1</label>
+            <label><input type="checkbox" value="cap2"> CAP 2</label>
+            <label><input type="checkbox" value="2pro"> 2de pro</label>
+            <label><input type="checkbox" value="1pro"> 1re pro</label>
+            <label><input type="checkbox" value="tpro"> Tle pro</label>
+          </div>
+          <div class="rangee"><button type="button" id="btn-creer-pad" class="principal">Ajouter la carte</button></div>
+          <p class="aide-code" id="aide-pad">Sans niveau coché, la carte est visible à tous les niveaux.</p>
+        </div>
+      </section>
+
+      <section>
+        <h3>Mode classe (enseignant)</h3>
+        <p>Verrouille Labo Élève en plein écran pendant la séance : l'élève ne peut plus fermer l'application, et chaque fois qu'il en sort (Alt+Tab, autre bureau…), c'est signalé et noté dans un journal. Seul ton code permet de quitter ce mode.</p>
+        <div class="rangee">
+          <input type="password" id="code-activation" class="champ-code" inputmode="numeric" maxlength="8" autocomplete="off" placeholder="Code enseignant">
+          <input type="password" id="code-confirmation" class="champ-code" inputmode="numeric" maxlength="8" autocomplete="off" placeholder="Confirme le code" hidden>
+          <button type="button" id="btn-activer-classe" class="principal">Activer le mode classe</button>
+        </div>
+        <p class="aide-code" id="aide-code"></p>
+      </section>
+
+      <section>
+        <h3>Outils installés</h3>
+        <ul id="liste-installes" class="liste-installes"></ul>
+        <button type="button" id="btn-ouvrir-dossier" class="lien">Ouvrir le dossier des outils ajoutés</button>
+      </section>
+
+      <footer id="infos-app"></footer>
+    </form>
+  </dialog>
+
+  <!-- ====== Espace enseignant (mode classe) ====== -->
+  <dialog id="dlg-classe" class="dialogue">
+    <form method="dialog" class="dialogue-contenu">
+      <header>
+        <h2>Espace enseignant</h2>
+        <button class="icone-btn" value="fermer" aria-label="Fermer">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+        </button>
+      </header>
+      <section id="classe-verrou">
+        <p>Le mode classe est actif. Entre ton code enseignant pour voir le journal ou quitter le mode classe.</p>
+        <div class="rangee">
+          <input type="password" id="code-enseignant" class="champ-code" inputmode="numeric" maxlength="8" autocomplete="off" placeholder="Code enseignant">
+          <button type="button" id="btn-deverrouiller" class="principal">Valider</button>
+        </div>
+        <p class="aide-code" id="erreur-code"></p>
+      </section>
+      <section id="classe-panneau" hidden>
+        <div class="resume-classe" id="resume-classe"></div>
+        <ul class="journal" id="journal-classe"></ul>
+        <div class="rangee">
+          <button type="button" id="btn-quitter-classe" class="principal">Quitter le mode classe</button>
+          <button type="button" id="btn-effacer-journal" class="secondaire">Effacer le journal</button>
+          <button type="button" id="btn-changer-code" class="lien">Changer le code</button>
+        </div>
+        <div class="rangee" id="rangee-nouveau-code" hidden style="margin-top:10px">
+          <input type="password" id="nouveau-code" class="champ-code" inputmode="numeric" maxlength="8" autocomplete="off" placeholder="Nouveau code">
+          <button type="button" id="btn-valider-code" class="secondaire">Enregistrer le nouveau code</button>
+        </div>
+      </section>
+    </form>
+  </dialog>
+
+  <!-- ====== Mode focus : confirmation de fermeture ====== -->
+  <dialog id="dlg-terminer" class="dialogue">
+    <form method="dialog" class="dialogue-contenu terminer">
+      <div class="alerte-icone" style="background:color-mix(in srgb, var(--accent) 14%, transparent);color:var(--accent)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v8"/><path d="M6.3 7.5a8 8 0 1 0 11.4 0"/></svg></div>
+      <h2>Ton travail est-il bien terminé ?</h2>
+      <p>Avant de fermer, vérifie que tu as <b>enregistré tes documents</b> (bouton 💾 Enregistrer dans chaque outil).</p>
+      <p class="note-terminer">Ton professeur sera prévenu de l'heure à laquelle tu as fermé Labo Élève.</p>
+      <div class="rangee fin">
+        <button type="button" class="secondaire" id="btn-continuer-travail">Continuer à travailler</button>
+        <button type="button" class="principal" id="btn-confirmer-fermeture">Oui, j'ai terminé : fermer</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- ====== Alerte : l'élève a quitté l'application ====== -->
+  <div id="alerte-sortie" class="alerte-sortie" hidden>
+    <div class="alerte-carte" role="alertdialog" aria-labelledby="alerte-titre">
+      <div class="alerte-icone">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
+      </div>
+      <h2 id="alerte-titre">Tu as quitté Labo Élève</h2>
+      <p id="alerte-texte"></p>
+      <p class="alerte-note">Pendant la séance, reste dans l'application. Chaque sortie est notée et ton professeur peut la consulter.</p>
+      <button id="btn-alerte-ok" class="principal" disabled>J'ai compris</button>
+    </div>
+  </div>
+
+  <div id="toasts" class="toasts" aria-live="polite"></div>
+
+  <link rel="stylesheet" href="prof.css">
+  <script src="themes.js"></script>
+  <script src="shell.js"></script>
+  <script src="prof.js"></script>
+  <script src="../commun/equations.js"></script>
+  <script src="prof-evaluations.js"></script>
+  <script src="prof-notes.js"></script>
+  <script src="eleve.js"></script>
+</body>
+</html>

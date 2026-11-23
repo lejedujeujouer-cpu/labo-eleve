@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title>GeoGebra Classique</title>
+  <link rel="stylesheet" href="../../commun/outil.css">
+  <script src="../../commun/outil.js"></script>
+  <style>
+    body { overflow-y: auto; }
+    .page { min-height: 100vh; display: grid; place-items: center; padding: 32px 20px; }
+    .carte { width: min(680px, 100%); background: var(--surface); border: 1px solid var(--bord); border-radius: 22px; box-shadow: var(--ombre); padding: 30px 34px; }
+    .entete { display: flex; gap: 16px; align-items: center; margin-bottom: 10px; }
+    .entete .tuile { width: 56px; height: 56px; border-radius: 16px; display: grid; place-items: center; background: linear-gradient(140deg, #8b7cf0, #4f3fc0); flex: none; }
+    .entete .tuile img { width: 36px; height: 36px; }
+    h1 { font-size: 23px; }
+    p { color: var(--texte-doux); font-size: 14.5px; }
+    .etat { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-radius: 12px; font-weight: 600; font-size: 14px; margin: 18px 0; background: color-mix(in srgb, var(--accent) 10%, transparent); color: var(--accent); }
+    .etat.ok { background: color-mix(in srgb, var(--c3) 14%, transparent); color: var(--c3); }
+    .roue { width: 16px; height: 16px; border-radius: 50%; border: 2.5px solid currentColor; border-right-color: transparent; animation: tourne .9s linear infinite; flex: none; }
+    .etat.ok .roue { display: none; }
+    @keyframes tourne { to { transform: rotate(360deg); } }
+    .mention { margin: 18px 0 0; font-size: 12.5px; }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="carte">
+      <div class="entete">
+        <div class="tuile"><img src="icone.svg" alt=""></div>
+        <h1>GeoGebra Classique</h1>
+      </div>
+      <p id="explication">Labo Élève ouvre le GeoGebra installé sur ton ordinateur, directement dans l'application.</p>
+      <div class="etat" id="etat"><span class="roue"></span><span id="etat-texte">Recherche de GeoGebra sur ton ordinateur…</span></div>
+      <div id="absent" hidden>
+        <p>GeoGebra n'a pas été trouvé. Installe <b>GeoGebra Classic 6</b> ou la <b>Calculatrice GeoGebra</b> (gratuits) depuis le site officiel : il s'ouvrira ici automatiquement.</p>
+        <div class="boutons">
+          <button class="btn principal" id="btn-site">Ouvrir la page de téléchargement de GeoGebra</button>
+          <button class="btn" id="btn-chercher">Rechercher à nouveau</button>
+        </div>
+      </div>
+      <p class="mention">GeoGebra® est un logiciel gratuit pour un usage non commercial (<a href="https://www.geogebra.org/license" target="_blank">licence GeoGebra</a>). Il n'est pas fourni avec Labo Élève : c'est la version installée sur ton ordinateur qui est utilisée. Made with GeoGebra®.</p>
+    </div>
+  </div>
+
+  <script>
+    const LANCEUR = 'app://externe/geogebra/labo-geogebra.html';
+    const api = window.parent && window.parent.labo && window.parent.labo.geogebra;
+    const $ = (id) => document.getElementById(id);
+    let minuterie = null;
+
+    async function chercher(manuel) {
+      const e = await api.etat();
+      if (e.installe) {
+        clearInterval(minuterie);
+        $('etat').className = 'etat ok';
+        $('etat-texte').textContent = `GeoGebra ${e.version || ''} trouvé : ouverture…`;
+        setTimeout(() => location.replace(LANCEUR), 300);
+        return;
+      }
+      $('absent').hidden = false;
+      $('etat-texte').textContent = manuel ? 'Toujours pas trouvé. Termine l\'installation, puis réessaie.' : 'En attente de l\'installation de GeoGebra…';
+    }
+    $('btn-site').addEventListener('click', () => window.open('https://www.geogebra.org/download'));
+    $('btn-chercher').addEventListener('click', () => chercher(true));
+
+    (async () => {
+      if (!api) { $('etat-texte').textContent = 'Cette page doit être ouverte depuis Labo Élève.'; return; }
+      await chercher(false);
+      if (!$('absent').hidden) minuterie = setInterval(() => chercher(false), 4000);
+    })();
+  </script>
+</body>
+</html>

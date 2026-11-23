@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title>Cartes mémoire</title>
+  <link rel="stylesheet" href="../../commun/outil.css">
+  <link rel="stylesheet" href="cartes.css">
+  <script src="../../commun/outil.js"></script>
+  <script src="../../commun/document.js"></script>
+  <script src="../../commun/equations.js"></script>
+</head>
+<body>
+  <!-- Mes paquets -->
+  <section class="vue" id="vue-liste">
+    <header class="entete">
+      <div><h1>🃏 Cartes mémoire</h1><p class="note">Une carte = une question au recto, la réponse au verso. Tes paquets sont enregistrés dans <b>Mes documents</b>.</p></div>
+      <button class="btn principal" id="btn-nouveau">+ Nouveau paquet</button>
+    </header>
+    <div class="paquets" id="paquets"></div>
+    <details class="aide">
+      <summary>Comment ça marche ?</summary>
+      <ul>
+        <li><b>Crée un paquet</b> par chapitre, puis écris tes cartes : une question (recto) et sa réponse (verso).</li>
+        <li><b>Réviser</b> : lis la question, réponds dans ta tête, retourne la carte, puis dis honnêtement si tu savais.</li>
+        <li>Une carte réussie passe dans la boîte suivante et revient plus tard (dans 1, 3, 7 puis 14 jours). Une carte ratée revient tout de suite en boîte 1.</li>
+        <li>Pour une formule, écris-la entre deux $ : <code>$U=R*I$</code>, <code>$x^2$</code>, <code>$(a+b)/2$</code>, <code>$√(x+1)$</code>.</li>
+        <li>Ton professeur peut te donner un paquet tout prêt (fichier <code>.cartes.csv</code>) : il apparaît ici dès que tu l'ouvres.</li>
+      </ul>
+    </details>
+  </section>
+
+  <!-- Modifier un paquet -->
+  <section class="vue" id="vue-edition" hidden>
+    <header class="entete">
+      <button class="btn" id="btn-retour-edition">← Mes paquets</button>
+      <input type="text" id="nom-paquet" class="nom-paquet" maxlength="80" placeholder="Nom du paquet (ex. Loi d'Ohm)">
+      <span class="etat" id="etat-edition"></span>
+      <button class="btn" id="btn-reviser-edition">▶ Réviser</button>
+      <button class="btn principal" id="btn-enregistrer">Enregistrer</button>
+    </header>
+    <div class="palette" id="palette" title="Cliquer pour insérer le symbole"></div>
+    <div class="liste-cartes" id="liste-cartes"></div>
+    <div class="pied-edition">
+      <button class="btn" id="btn-ajouter">+ Ajouter une carte</button>
+      <span class="note">Astuce : Ctrl+Entrée ajoute une carte, Tab passe du recto au verso.</span>
+    </div>
+  </section>
+
+  <!-- Réviser -->
+  <section class="vue" id="vue-revision" hidden>
+    <header class="entete">
+      <button class="btn" id="btn-retour-revision">← Mes paquets</button>
+      <b id="titre-revision"></b>
+      <span class="espace"></span>
+      <label class="choix">Mode
+        <select id="mode"><option value="retourner">Retourner la carte</option><option value="ecrire">Écrire la réponse</option></select></label>
+      <label class="choix">Sens
+        <select id="sens"><option value="recto">Question → réponse</option><option value="verso">Réponse → question</option><option value="melange">Mélangé</option></select></label>
+    </header>
+    <div class="progression"><div class="barre-progression"><span id="barre"></span></div><span id="compteur"></span></div>
+    <div class="zone-carte">
+      <div class="carte" id="carte" tabindex="0" title="Cliquer (ou Espace) pour retourner la carte">
+        <div class="face recto"><span class="etiquette" id="etiquette-recto">Question</span><div class="contenu" id="face-recto"></div><span class="indication">Clique ou appuie sur Espace pour voir la réponse</span></div>
+        <div class="face verso"><span class="etiquette" id="etiquette-verso">Réponse</span><div class="contenu" id="face-verso"></div></div>
+      </div>
+      <form class="saisie" id="form-reponse" hidden>
+        <input type="text" id="reponse" placeholder="Écris ta réponse puis appuie sur Entrée" autocomplete="off">
+        <button class="btn principal" type="submit">Vérifier</button>
+      </form>
+      <div class="resultat" id="resultat"></div>
+      <div class="boutons-note" id="boutons-note" hidden>
+        <button class="btn note-ko" id="btn-ko">✘ À revoir <kbd>1</kbd></button>
+        <button class="btn note-ok" id="btn-ok">✔ Je savais <kbd>2</kbd></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Bilan -->
+  <section class="vue" id="vue-bilan" hidden>
+    <div class="bilan">
+      <div class="score" id="score"></div>
+      <p id="phrase-bilan"></p>
+      <div class="boites" id="boites"></div>
+      <div id="a-revoir"></div>
+      <div class="boutons">
+        <button class="btn principal" id="btn-erreurs">Revoir mes erreurs</button>
+        <button class="btn" id="btn-tout">Tout réviser à nouveau</button>
+        <button class="btn" id="btn-retour-bilan">Mes paquets</button>
+      </div>
+    </div>
+  </section>
+
+  <script src="cartes.js"></script>
+</body>
+</html>

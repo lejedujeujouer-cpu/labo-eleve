@@ -1,0 +1,12 @@
+{
+  "id": "evaluation-maths",
+  "titre": "Évaluation",
+  "description": "L'évaluation lancée par ton professeur : QCM de cours et calculs, avec une calculatrice.",
+  "matiere": "maths",
+  "version": "1.0.0",
+  "icone": "icone.svg",
+  "couleur": "#5865f2",
+  "interne": true,
+  "motsCles": ["évaluation", "contrôle", "qcm", "automatismes"],
+  "entree": "index.html"
+}

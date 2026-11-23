@@ -1,0 +1,12 @@
+{
+  "id": "kahoot",
+  "titre": "Kahoot!",
+  "description": "Rejoins le quiz de ton professeur : entre le code PIN affiché au tableau, choisis ton pseudo et réponds le plus vite possible.",
+  "matiere": "exercices",
+  "version": "1.0.0",
+  "icone": "icone.svg",
+  "couleur": "#46178f",
+  "site": "kahoot",
+  "examen": true,
+  "motsCles": ["kahoot", "quiz", "jeu", "pin", "qcm", "questionnaire", "défi"]
+}

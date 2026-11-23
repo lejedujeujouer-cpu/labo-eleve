@@ -1,0 +1,11 @@
+{
+  "id": "site-labo",
+  "titre": "Site",
+  "description": "Site ajouté par le professeur dans un labo (ouvert dans Labo Élève, limité à ce site).",
+  "matiere": "documents",
+  "version": "1.0.0",
+  "icone": "icone.svg",
+  "couleur": "#0891b2",
+  "site": "lien",
+  "interne": true
+}

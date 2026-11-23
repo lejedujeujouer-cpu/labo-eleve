@@ -1,0 +1,11 @@
+{
+  "id": "word-en-ligne",
+  "titre": "Word en ligne",
+  "description": "Le vrai Word de Microsoft, dans Labo Élève, avec ton compte de l'établissement. Tes fichiers sont sur ton OneDrive.",
+  "matiere": "bureautique",
+  "version": "1.0.0",
+  "icone": "icone.svg",
+  "couleur": "#185abd",
+  "office": "word",
+  "motsCles": ["word", "office", "microsoft 365", "office 365", "onedrive", "texte", "compte rendu"]
+}

@@ -1,0 +1,21 @@
+Équations à la balance — crédits
+================================
+
+Auteur : Arnaud DURAND — https://www.mathix.org
+Outil d'origine : « equation-anim », https://www.mathix.org/equation-anim/
+Mention de l'auteur : « Arnaud DURAND © 08/07/20 GPL v5 - mathix.org »
+Licence : GPL, comme indiqué par l'auteur sur la page de l'outil. L'outil est redistribué ici sous la même licence,
+avec son code source complet (les fichiers .js, .css et .html de ce dossier, lisibles et non compilés).
+
+Fichiers copiés depuis le site de l'auteur le 16/11/2026, sans modification :
+  canvas.js, prechargement.js, gestionsouris.js, styles.css,
+  plus.png, moins.png, fois.png, div.png, fleche.png, fleche2.png,
+  poids.png, poidsx.png, poidstrans.png, poidsxtrans.png, loading.png,
+  font/cursif-webfont.woff2, font/cursif-webfont.woff, font/cursif-webfont.ttf
+
+Modifications apportées pour Labo Élève (index.html uniquement, = page.html de l'auteur) :
+  - langue de la page (lang="fr") et titre « Équations à la balance » ;
+  - le lien vers mathix.org du pied de page est remplacé par le texte de l'adresse (l'élève ne quitte pas Labo Élève),
+    et la mention « Outil créé par Arnaud DURAND » y est ajoutée ;
+  - commentaire renvoyant à ce fichier.
+Le fonctionnement de l'outil n'est pas modifié. Tous les droits restent à leur auteur.

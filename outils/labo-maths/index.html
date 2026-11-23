@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title>Labo de maths</title>
+  <link rel="stylesheet" href="../../commun/outil.css">
+  <link rel="stylesheet" href="../../commun/labo-virtuel/moteur.css">
+  <script src="../../commun/outil.js"></script>
+  <script src="../../commun/document.js"></script>
+  <script src="../../commun/labo-virtuel/moteur.js"></script>
+  <script src="manips.js"></script>
+</head>
+<body>
+  <script>
+    LaboVirtuel.demarrer({
+      outil: 'labo-maths', titre: 'Labo de maths', icone: '📐', couleur: '#5865f2',
+      sousTitre: 'Choisis une exploration : fais bouger les curseurs, observe, et réponds aux questions du panneau de droite pour découvrir la notion par toi-même.',
+      manips: window.MANIPS_MATHS, sansEpi: true,
+    });
+  </script>
+</body>
+</html>

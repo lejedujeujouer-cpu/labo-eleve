@@ -1,0 +1,22 @@
+{
+  "id": "quiziniere",
+  "titre": "La Quizinière",
+  "description": "Les exercices en ligne de ton professeur (exerciseur de Réseau Canopé) : entre le code de l'exercice, réponds, puis retrouve ta copie corrigée.",
+  "matiere": "exercices",
+  "version": "1.0.0",
+  "icone": "icone.svg",
+  "couleur": "#e03131",
+  "site": "quiziniere",
+  "examen": true,
+  "motsCles": [
+    "quiziniere",
+    "quizinière",
+    "exercice",
+    "quiz",
+    "qcm",
+    "sondage",
+    "évaluation",
+    "canopé",
+    "code"
+  ]
+}

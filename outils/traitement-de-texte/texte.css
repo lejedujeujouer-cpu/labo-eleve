@@ -1,0 +1,103 @@
+body { overflow: hidden; }
+[hidden] { display: none !important; }
+
+/* Galerie de styles (Accueil > Styles) */
+.galerie-styles { gap: 4px !important; }
+.style-rapide { width: 78px; height: 64px; border: 1px solid var(--bord); border-radius: 4px; background: var(--surface); color: var(--texte-doux); cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: 11.5px; overflow: hidden; }
+.style-rapide:hover { border-color: var(--appli); background: var(--appli-clair); }
+.style-rapide.actif { border: 2px solid var(--appli); }
+.style-rapide .apercu { font-family: Calibri, "Segoe UI", sans-serif; color: var(--texte); white-space: nowrap; }
+.apercu.normal { font-size: 14px; }
+.apercu.t1 { font-size: 17px; color: #2f5496; }
+.apercu.t2 { font-size: 15px; color: #2f5496; }
+.apercu.t3 { font-size: 14px; color: #1f3763; }
+
+/* Menus : grille de tableau, symboles */
+.titre-grille { font-size: 12.5px; padding: 4px 6px 6px; color: var(--texte-doux); }
+.grille-tableau { display: grid; grid-template-columns: repeat(10, 18px); gap: 3px; padding: 2px 6px 6px; }
+.grille-tableau span { width: 18px; height: 18px; border: 1px solid #b9bfca; background: var(--surface); cursor: pointer; }
+.grille-tableau span.on { background: color-mix(in srgb, var(--appli) 25%, var(--surface)); border-color: var(--appli); }
+.grille-symboles { display: grid; grid-template-columns: repeat(8, 32px); gap: 2px; padding: 2px; }
+.menu-flottant .grille-symboles button { width: 32px; height: 32px; padding: 0; justify-content: center; font-size: 16px; font-family: "Cambria Math", Cambria, serif; border: 1px solid var(--bord); }
+
+.bandeau-info { padding: 7px 14px; font-size: 13px; background: color-mix(in srgb, var(--c4) 16%, var(--surface)); border-bottom: 1px solid var(--bord); flex: none; }
+
+/* Zone de travail : page blanche sur fond gris, comme dans les traitements de texte */
+.zone-page { flex: 1; overflow: auto; background: #e6e6e6; padding: 14px 20px 60px; }
+:root[data-theme="dark"] .zone-page { background: #0b0f1a; }
+.feuille { --l: 794px; --h: 1123px; --mh: 96px; --mb: 96px; --mg: 96px; --md: 96px; width: var(--l); margin: 0 auto; }
+
+/* Règle (en cm) */
+.regle { position: relative; height: 22px; margin-bottom: 8px; background: #d4d4d4; border: 1px solid #c2c2c2; font-size: 9.5px; color: #555; overflow: hidden; }
+.regle .zone-texte { position: absolute; top: 0; bottom: 0; background: #fff; }
+.regle .graduation { position: absolute; bottom: 0; width: 1px; background: #888; }
+.regle .chiffre { position: absolute; top: 3px; transform: translateX(-50%); }
+.regle .marque-retrait { position: absolute; top: 12px; width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-bottom: 8px solid #6d6d6d; transform: translateX(-5px); }
+
+.page { position: relative;
+  width: var(--l); min-height: var(--h); box-sizing: border-box; padding: var(--mh) var(--md) var(--mb) var(--mg);
+  background: #fff; color: #000; box-shadow: 0 1px 6px rgba(0,0,0,.25);
+  font-family: Calibri, "Segoe UI", Arial, sans-serif; font-size: 11pt; line-height: 1.15; outline: none;
+  /* trait gris à chaque fin de page */
+  background-image: repeating-linear-gradient(to bottom, transparent 0, transparent calc(var(--h) - var(--mh) - var(--mb) - 1px), #c7cbd3 calc(var(--h) - var(--mh) - var(--mb) - 1px), #c7cbd3 calc(var(--h) - var(--mh) - var(--mb))), linear-gradient(#fff, #fff);
+  background-origin: content-box, border-box; background-clip: content-box, border-box;
+}
+.page h1 { font-size: 16pt; color: #2f5496; margin: 12pt 0 4pt; font-weight: 400; }
+.page h2 { font-size: 13pt; color: #2f5496; margin: 10pt 0 3pt; font-weight: 400; }
+.page h3 { font-size: 12pt; color: #1f3763; margin: 8pt 0 3pt; font-weight: 400; }
+.page p { margin: 0 0 8pt; }
+.page ul, .page ol { margin: 0 0 8pt; padding-left: 36px; }
+.page li { margin: 0; }
+.page table { border-collapse: collapse; width: 100%; margin: 0 0 8pt; }
+.page td, .page th { border: 1px solid #000; padding: 2px 7px; min-width: 40px; vertical-align: top; text-align: left; }
+.page th { font-weight: 700; }
+.page img { max-width: 100%; height: auto; }
+.page img.selectionnee { outline: 2px solid var(--appli); outline-offset: 2px; }
+.page mark { color: inherit; }
+.page a { color: #0563c1; text-decoration: underline; }
+.page hr.saut-page { border: 0; border-top: 1px dashed #9aa1ae; margin: 6px 0 0; position: relative; overflow: visible; box-sizing: border-box; }
+.page hr.saut-page::after { content: "Saut de page"; position: absolute; left: 50%; top: -9px; transform: translateX(-50%); background: #fff; color: #7b8190; font-size: 11px; padding: 0 8px; }
+
+.barre-image { position: fixed; left: 50%; bottom: 40px; transform: translateX(-50%); background: var(--surface); border: 1px solid var(--bord); border-radius: 8px; padding: 6px 10px; box-shadow: 0 8px 24px rgba(0,0,0,.2); display: flex; gap: 4px; align-items: center; font-size: 13px; z-index: 10; }
+
+/* ---------- Pages séparées (comme dans Word) ---------- */
+.pile-pages { position: relative; }
+.fonds-pages { position: absolute; left: 0; top: 0; width: var(--l); }
+.fond-page { position: absolute; left: 0; width: var(--l); height: var(--h); background: #fff; box-shadow: 0 1px 6px rgba(0,0,0,.28); }
+.entete-page, .pied-page { position: absolute; left: var(--mg); right: var(--md); font: 9.5pt Calibri, "Segoe UI", sans-serif; color: #555; white-space: nowrap; overflow: hidden; }
+.entete-page { top: calc(var(--mh) / 2 - 8px); }
+.pied-page { bottom: calc(var(--mb) / 2 - 8px); display: grid; grid-template-columns: 1fr 1fr 1fr; }
+.pied-page .c { text-align: center; } .pied-page .d { text-align: right; }
+.page { background: transparent !important; box-shadow: none !important; z-index: 1; }
+.page hr.saut-page { height: auto !important; margin: 6px 0; }
+
+/* ---------- Équations (saisies dans la page, comme dans Word) ---------- */
+.page .equation { display: inline-block; position: relative; padding: 0 2px; border-radius: 3px; cursor: pointer; vertical-align: middle; }
+.page .equation:hover { background: #e7efff; outline: 1px solid #9bb5f0; }
+.page math, .eq-ic math { font-size: 1.12em; }
+.page .equation .eq-source { display: none; }
+.page .equation.en-edition { background: #eef3ff; outline: 1px solid #7f9fe0; cursor: text; padding: 1px 4px; }
+.page .equation.en-edition .eq-source { display: inline-block; min-width: 2px; outline: none; white-space: pre-wrap; font-family: 'Cambria Math', Cambria, serif; font-style: italic; color: #000; cursor: text; }
+.page .equation.en-edition .eq-source:empty::before { content: 'Tapez une équation ici.'; color: #8a8f99; font-style: normal; font-family: Calibri, 'Segoe UI', sans-serif; }
+/* Pendant la frappe : aperçu du rendu « professionnel » au-dessus de la zone */
+.page .equation.en-edition .eq-rendu { position: absolute; left: -1px; bottom: calc(100% + 6px); z-index: 5; padding: 3px 8px; white-space: nowrap; background: #fff; border: 1px solid #9bb5f0; border-radius: 6px; box-shadow: 0 4px 14px rgba(0,0,0,.18); pointer-events: none; font-size: 1.05em; }
+.page .equation.en-edition.vide .eq-rendu { display: none; }
+.onglets-ruban .contextuel { color: #8a3ab9; font-weight: 600; }
+.onglets-ruban .contextuel.actif { color: #8a3ab9; border-bottom-color: #8a3ab9; }
+.eq-bouton { min-width: 46px; max-width: 62px; padding: 4px 3px; font-size: 11.5px; }
+.eq-bouton .eq-ic { display: grid; place-items: center; height: 30px; color: var(--texte); font-size: 13px; }
+.groupe-ruban .contenu.grille-eq-symboles { display: grid; grid-template-columns: repeat(8, 26px); grid-auto-rows: 21px; gap: 1px 2px; align-content: start; }
+.grille-eq-symboles .br { justify-content: center; padding: 0; min-width: 0; min-height: 0; height: 21px; font-family: 'Cambria Math', Cambria, serif; font-size: 14px; }
+.aide-eq { flex: none; width: 230px; white-space: normal; align-self: center; margin-left: 12px; font-size: 11.5px; color: var(--texte-doux); line-height: 1.45; }
+.aide-eq code { font-family: Consolas, monospace; background: var(--appli-clair); padding: 0 3px; border-radius: 3px; }
+
+/* ---------- Raccourcis clavier ---------- */
+.barre-titre .acces.aide { font-weight: 700; font-size: 15px; }
+.menu-flottant .raccourci-menu { margin-left: auto; padding-left: 24px; color: var(--texte-doux); font-size: 12px; }
+.fenetre-raccourcis { width: min(1040px, 96vw); gap: 8px; }
+.liste-raccourcis { columns: 3 280px; column-gap: 22px; }
+.groupe-raccourcis { break-inside: avoid; margin-bottom: 10px; }
+.groupe-raccourcis h3 { font-size: 13px; margin: 0 0 4px; color: var(--appli, #2b579a); }
+.raccourci { display: grid; grid-template-columns: 128px 1fr; gap: 6px; align-items: center; padding: 2px 0; font-size: 12.5px; border-bottom: 1px solid var(--bord); }
+.raccourci kbd { display: inline-block; min-width: 18px; padding: 1px 5px; border: 1px solid var(--bord); border-bottom-width: 2px; border-radius: 4px; background: var(--surface); font: 600 11.5px "Segoe UI", sans-serif; text-align: center; }
+.page .equation.vide:not(.en-edition) { padding: 0; }

@@ -1,0 +1,11 @@
+{
+  "id": "mes-documents",
+  "titre": "Mes documents",
+  "description": "Retrouve les documents téléchargés depuis les pads, écris et dessine sur les PDF, puis enregistre-les.",
+  "matiere": "documents",
+  "version": "1.0.0",
+  "icone": "icone.svg",
+  "couleur": "#0e7490",
+  "motsCles": ["pdf", "documents", "annoter", "fiche", "exercice", "télécharger", "digipad"],
+  "entree": "index.html"
+}

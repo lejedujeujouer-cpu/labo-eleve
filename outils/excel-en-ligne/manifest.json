@@ -1,0 +1,11 @@
+{
+  "id": "excel-en-ligne",
+  "titre": "Excel en ligne",
+  "description": "Le vrai Excel de Microsoft, dans Labo Élève, avec ton compte de l'établissement. Tes fichiers sont sur ton OneDrive.",
+  "matiere": "bureautique",
+  "version": "1.0.0",
+  "icone": "icone.svg",
+  "couleur": "#107c41",
+  "office": "excel",
+  "motsCles": ["excel", "office", "microsoft 365", "office 365", "onedrive", "tableur", "graphique"]
+}

@@ -1,0 +1,135 @@
+/* Labo virtuel (chimie, physique) : paillasse interactive + panneau du protocole */
+[hidden] { display: none !important; }
+body { margin: 0; height: 100vh; display: flex; flex-direction: column; background: var(--fond); color: var(--texte); font-family: "Segoe UI", system-ui, sans-serif; }
+.lv-barre { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 8px 14px; background: var(--surface); border-bottom: 1px solid var(--bord); }
+.lv-barre h1 { margin: 0; font-size: 18px; }
+.lv-barre .lv-espace { flex: 1; }
+.lv-barre .btn { padding: 6px 12px; font-size: 13.5px; }
+.btn.principal { background: var(--lv-c); border-color: var(--lv-c); color: #fff; }
+.lv-badge { font-size: 11.5px; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: color-mix(in srgb, var(--lv-c) 14%, var(--surface)); color: var(--lv-c); border: 1px solid color-mix(in srgb, var(--lv-c) 35%, var(--bord)); }
+
+/* Accueil : liste des manipulations */
+.lv-accueil { flex: 1; overflow: auto; padding: 20px; }
+.lv-accueil > p { max-width: 1100px; margin: 0 auto 16px; color: var(--texte-doux); }
+.lv-manips { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
+.lv-carte { display: flex; flex-direction: column; gap: 8px; text-align: left; padding: 16px; border-radius: 16px; border: 1px solid var(--bord); background: var(--surface); box-shadow: var(--ombre); color: var(--texte); font: inherit; cursor: pointer; transition: transform .12s, border-color .12s; }
+.lv-carte:hover { transform: translateY(-2px); border-color: var(--lv-c); }
+.lv-carte .lv-ic { font-size: 30px; }
+.lv-carte h2, .lv-ressources-entete h2 { margin: 0; font-size: 17px; text-transform: none; letter-spacing: 0; color: var(--texte); }
+.sans-epi .lv-epi { display: none; }
+.lv-carte .lv-theme { font-size: 12.5px; color: var(--lv-c); font-weight: 700; }
+.lv-carte p { margin: 0; font-size: 13.5px; color: var(--texte-doux); line-height: 1.4; }
+.lv-carte .lv-badges { display: flex; gap: 4px; flex-wrap: wrap; }
+.lv-carte .lv-fait { font-size: 12px; color: #15803d; font-weight: 700; }
+
+/* Simulateurs et sites ajoutés par l'enseignant */
+.lv-ressources { max-width: 1100px; margin: 26px auto 0; }
+.lv-ressources-entete { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.lv-ressources-entete h2 { margin: 0; font-size: 18px; }
+.lv-ressources-entete .lv-espace { flex: 1; }
+.lv-ressources .lv-aide { margin: 6px 0 12px; }
+.lv-ressource .btn.danger { font-size: 12.5px; padding: 4px 10px; color: #b42318; }
+.lv-simulateur { flex: 1; min-height: 0; display: flex; }
+.lv-simulateur iframe { flex: 1; border: 0; background: #fff; }
+.lv-champ-form { display: flex; flex-direction: column; gap: 4px; font-size: 13px; font-weight: 600; color: var(--texte-doux); }
+/* Expériences du professeur, manipulations masquées */
+.lv-gestion-manips { max-width: 1100px; margin: 0 auto 14px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.lv-gestion-manips .lv-aide { margin: 0; flex: 1; min-width: 240px; }
+.lv-carte.masquee { opacity: .55; border-style: dashed; filter: grayscale(.7); }
+.lv-carte.masquee:hover { opacity: .8; }
+.lv-carte.perso { border-color: color-mix(in srgb, var(--lv-c) 45%, var(--bord)); }
+.lv-carte .lv-auteur { font-size: 12px; font-weight: 700; color: var(--texte-doux); }
+.lv-gestion-carte { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 2px; }
+.lv-gestion-carte .btn { font-size: 12.5px; padding: 4px 10px; }
+.lv-gestion-carte .btn.danger { color: #b42318; }
+.lv-scene.plein { padding: 0; align-items: stretch; }
+.lv-scene .lv-integration { flex: 1; width: 100%; min-height: 0; border: 0; background: #fff; }
+.lv-lien-exp { margin: auto; max-width: 480px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 24px; border-radius: 16px; border: 1px solid var(--bord); background: var(--surface); box-shadow: var(--ombre); }
+.lv-lien-exp .lv-ic { font-size: 40px; }
+.lv-lien-exp p { margin: 0; }
+.lv-etape .lv-cocher { border: 2px solid var(--bord); cursor: pointer; padding: 0; font: inherit; font-size: 12px; font-weight: 800; }
+.lv-etape .lv-cocher:hover { border-color: var(--lv-c); }
+.lv-etape.fait .lv-cocher { border-color: #16a34a; }
+.lv-fenetre-exp { width: min(620px, 94vw) !important; max-height: 92vh; overflow: auto; }
+.lv-champ-form textarea { font: inherit; font-weight: 400; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--bord); background: var(--surface-2); color: var(--texte); resize: vertical; }
+.lv-cases { display: flex; gap: 6px 14px; flex-wrap: wrap; font-weight: 400; color: var(--texte); }
+.doc-fenetre .lv-cases label, .doc-fenetre .lv-champ-case { font-weight: 400; display: inline-flex; align-items: center; gap: 5px; cursor: pointer; }
+.lv-erreur { margin: 0; color: #b42318; font-weight: 650; font-size: 13.5px; }
+.lv-champ-form input { font: inherit; font-weight: 400; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--bord); background: var(--surface-2); color: var(--texte); }
+
+/* Manipulation : paillasse + panneau */
+.lv-manip { flex: 1; min-height: 0; display: flex; }
+.lv-scene-zone { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.lv-epi { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 8px 14px; border-bottom: 1px solid var(--bord); background: var(--surface-2); font-size: 13.5px; }
+.lv-epi b { color: var(--texte-doux); font-weight: 650; }
+.lv-epi button { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 999px; border: 1.5px dashed var(--bord); background: var(--surface); color: var(--texte-doux); font: inherit; font-size: 13px; cursor: pointer; }
+.lv-epi button.porte { border-style: solid; border-color: #16a34a; color: #15803d; background: color-mix(in srgb, #16a34a 10%, var(--surface)); font-weight: 650; }
+.lv-scene { flex: 1; min-height: 0; overflow: auto; padding: 14px; display: flex; flex-direction: column; align-items: center; gap: 12px; background: linear-gradient(var(--fond), color-mix(in srgb, var(--lv-c) 5%, var(--fond))); }
+.lv-scene svg { width: 100%; max-width: 980px; height: auto; display: block; user-select: none; }
+.lv-scene .cliquable { cursor: pointer; }
+.lv-scene .cliquable:hover { filter: drop-shadow(0 0 6px color-mix(in srgb, var(--lv-c) 70%, transparent)); }
+.lv-scene .choisi { filter: drop-shadow(0 0 7px #f59e0b); }
+.lv-commandes { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; max-width: 980px; }
+.lv-commandes .btn { font-size: 13.5px; padding: 7px 12px; }
+.lv-commandes .groupe { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; padding: 6px 10px; border-radius: 12px; background: var(--surface); border: 1px solid var(--bord); font-size: 13.5px; }
+.lv-commandes .groupe > b { color: var(--texte-doux); font-weight: 650; margin-right: 2px; }
+.lv-commandes select, .lv-commandes input[type=number] { font: inherit; font-size: 13.5px; padding: 4px 6px; border-radius: 8px; border: 1px solid var(--bord); background: var(--surface); color: var(--texte); }
+.lv-commandes input[type=range] { width: 160px; accent-color: var(--lv-c); }
+.lv-message { min-height: 22px; padding: 8px 14px; border-top: 1px solid var(--bord); background: var(--surface); font-size: 14px; }
+.lv-message.alerte { background: color-mix(in srgb, #f59e0b 16%, var(--surface)); color: #92400e; font-weight: 600; }
+.lv-message.danger { background: color-mix(in srgb, #dc2626 14%, var(--surface)); color: #b42318; font-weight: 700; }
+.lv-message.ok { color: #15803d; font-weight: 600; }
+
+.lv-panneau { width: 390px; flex: 0 0 390px; border-left: 1px solid var(--bord); background: var(--surface); display: flex; flex-direction: column; min-height: 0; }
+.lv-panneau.replie { width: 46px; flex-basis: 46px; }
+.lv-panneau.replie .lv-onglets button:not(.lv-replier), .lv-panneau.replie .lv-contenu { display: none; }
+.lv-onglets { display: flex; border-bottom: 1px solid var(--bord); }
+.lv-onglets button { flex: 1; border: 0; background: none; padding: 10px 6px; font: inherit; font-size: 13px; font-weight: 650; color: var(--texte-doux); cursor: pointer; border-bottom: 3px solid transparent; }
+.lv-onglets button.actif { color: var(--lv-c); border-bottom-color: var(--lv-c); }
+.lv-onglets .lv-replier { flex: 0 0 40px; }
+.lv-contenu { flex: 1; min-height: 0; overflow: auto; padding: 12px 14px; }
+.lv-objectif { font-size: 13.5px; background: var(--surface-2); border: 1px solid var(--bord); border-radius: 10px; padding: 8px 10px; margin-bottom: 10px; }
+
+/* Protocole : suivre */
+.lv-etapes { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.lv-etape { display: grid; grid-template-columns: 26px 1fr; gap: 8px; padding: 8px; border-radius: 10px; border: 1px solid var(--bord); background: var(--surface); font-size: 14px; }
+.lv-etape .lv-num { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; font-weight: 800; background: var(--surface-2); color: var(--texte-doux); }
+.lv-etape.fait { background: color-mix(in srgb, #16a34a 8%, var(--surface)); border-color: color-mix(in srgb, #16a34a 35%, var(--bord)); }
+.lv-etape.fait .lv-num { background: #16a34a; color: #fff; }
+.lv-etape.courante { border-color: var(--lv-c); box-shadow: 0 0 0 2px color-mix(in srgb, var(--lv-c) 25%, transparent); }
+.lv-etape.courante .lv-num { background: var(--lv-c); color: #fff; }
+.lv-question { grid-column: 2; display: flex; flex-direction: column; gap: 4px; margin-top: 4px; font-size: 13px; color: var(--texte-doux); }
+.lv-question textarea, .lv-question select, .lv-question input { font: inherit; font-size: 13.5px; padding: 5px 8px; border-radius: 8px; border: 1px solid var(--bord); background: var(--surface-2); color: var(--texte); }
+.lv-question textarea { resize: vertical; min-height: 34px; }
+.lv-question .lv-correction { font-weight: 650; }
+.lv-question .lv-correction.ok { color: #15803d; }
+.lv-question .lv-correction.ko { color: #b42318; }
+.lv-bravo { margin-top: 12px; padding: 10px; border-radius: 10px; background: color-mix(in srgb, #16a34a 12%, var(--surface)); color: #15803d; font-weight: 700; text-align: center; }
+
+/* Protocole : construire */
+.lv-aide { font-size: 13px; color: var(--texte-doux); margin: 0 0 8px; }
+.lv-titre-bloc { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; color: var(--texte-doux); margin: 12px 0 6px; }
+.lv-cartes-etapes { display: flex; flex-direction: column; gap: 5px; }
+.lv-cartes-etapes button { text-align: left; padding: 7px 9px; border-radius: 9px; border: 1px dashed var(--bord); background: var(--surface-2); color: var(--texte); font: inherit; font-size: 13.5px; cursor: pointer; }
+.lv-cartes-etapes button:hover { border-color: var(--lv-c); }
+.lv-mon-protocole { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 5px; counter-reset: etape; }
+.lv-mon-protocole li { display: grid; grid-template-columns: 22px 1fr auto; gap: 6px; align-items: center; padding: 6px 8px; border-radius: 9px; border: 1px solid var(--bord); background: var(--surface); font-size: 13.5px; }
+.lv-mon-protocole li::before { counter-increment: etape; content: counter(etape); font-weight: 800; color: var(--lv-c); text-align: center; }
+.lv-mon-protocole li.ok { border-color: #16a34a; }
+.lv-mon-protocole li.ko { border-color: #dc2626; background: color-mix(in srgb, #dc2626 7%, var(--surface)); }
+.lv-mon-protocole .lv-petits { display: flex; gap: 2px; }
+.lv-mon-protocole .lv-petits button { border: 0; background: none; cursor: pointer; padding: 2px 4px; border-radius: 5px; color: var(--texte-doux); font-size: 13px; }
+.lv-mon-protocole .lv-petits button:hover { background: var(--surface-2); }
+.lv-verif { margin-top: 10px; font-size: 13.5px; display: flex; flex-direction: column; gap: 4px; }
+.lv-verif .ok { color: #15803d; } .lv-verif .ko { color: #b42318; } .lv-verif .info { color: var(--texte-doux); }
+
+/* Mesures */
+.lv-tableau { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.lv-tableau th, .lv-tableau td { border: 1px solid var(--bord); padding: 5px 6px; text-align: center; }
+.lv-tableau th { background: var(--surface-2); font-size: 12.5px; }
+.lv-tableau input, .lv-tableau select { width: 100%; box-sizing: border-box; font: inherit; font-size: 13px; padding: 3px; border: 1px solid var(--bord); border-radius: 6px; background: var(--surface); color: var(--texte); }
+.lv-tableau td.ok { background: color-mix(in srgb, #16a34a 10%, var(--surface)); }
+.lv-tableau td.ko { background: color-mix(in srgb, #dc2626 10%, var(--surface)); }
+.lv-graphique { width: 100%; aspect-ratio: 4 / 3; margin-top: 10px; background: var(--surface-2); border: 1px solid var(--bord); border-radius: 10px; }
+.lv-equation { font-size: 13.5px; margin-top: 6px; text-align: center; }
+.lv-actions-mesures { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }

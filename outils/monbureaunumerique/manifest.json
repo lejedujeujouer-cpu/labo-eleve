@@ -1,0 +1,11 @@
+{
+  "id": "monbureaunumerique",
+  "titre": "MonBureauNumérique",
+  "description": "Ton ENT, dans Labo Élève : cahier de textes, messagerie, ressources. Connexion avec ton compte EduConnect.",
+  "matiere": "etablissement",
+  "version": "1.0.0",
+  "icone": "icone.svg",
+  "couleur": "#0f766e",
+  "site": "ent",
+  "motsCles": ["ent", "mon bureau numérique", "mbn", "educonnect", "cahier de textes", "messagerie"]
+}

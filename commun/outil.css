@@ -1,0 +1,107 @@
+/* Styles partagés par tous les outils de Labo Élève.
+   Un outil l'inclut avec : <link rel="stylesheet" href="../../commun/outil.css"> */
+:root {
+  --fond: #f3f5fb;
+  --surface: #ffffff;
+  --surface-2: #f6f7fb;
+  --texte: #1b2233;
+  --texte-doux: #5d6679;
+  --bord: #e1e5ef;
+  --accent: #5865f2;
+  --grille: #e9ecf4;
+  --grille-forte: #d5dae7;
+  --axe: #7c869c;
+  --c1: #4f6bff;
+  --c2: #ef4b6c;
+  --c3: #12a37a;
+  --c4: #f08c00;
+  --c5: #8b5cf6;
+  --ciel-haut: #cfe6ff;
+  --ciel-bas: #f4f9ff;
+  --sol: #9ccc65;
+  --ombre: 0 1px 2px rgba(20, 30, 60, .06), 0 6px 18px rgba(20, 30, 60, .06);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --fond: #0e1220; --surface: #171c2c; --surface-2: #1d2336; --texte: #e9edf7; --texte-doux: #9aa3b9;
+    --bord: #2a3148; --accent: #7f8bff; --grille: #1f2638; --grille-forte: #2b3450; --axe: #75809a;
+    --c1: #7c93ff; --c2: #ff6b88; --c3: #34d399; --c4: #fbbf24; --c5: #b197fc;
+    --ciel-haut: #0b1530; --ciel-bas: #1b2a4a; --sol: #3d6b2f;
+    --ombre: 0 1px 2px rgba(0, 0, 0, .3), 0 6px 18px rgba(0, 0, 0, .25);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --fond: #0e1220; --surface: #171c2c; --surface-2: #1d2336; --texte: #e9edf7; --texte-doux: #9aa3b9;
+  --bord: #2a3148; --accent: #7f8bff; --grille: #1f2638; --grille-forte: #2b3450; --axe: #75809a;
+  --c1: #7c93ff; --c2: #ff6b88; --c3: #34d399; --c4: #fbbf24; --c5: #b197fc;
+  --ciel-haut: #0b1530; --ciel-bas: #1b2a4a; --sol: #3d6b2f;
+  --ombre: 0 1px 2px rgba(0, 0, 0, .3), 0 6px 18px rgba(0, 0, 0, .25);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body {
+  font-family: "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, sans-serif;
+  background: var(--fond); color: var(--texte); font-size: 14px; line-height: 1.45;
+  -webkit-font-smoothing: antialiased; overflow: hidden;
+}
+button, input, select { font: inherit; color: inherit; }
+code, .math { font-family: "Cambria Math", "Cambria", Georgia, serif; font-size: 1.05em; }
+h1 { font-size: 19px; margin: 0 0 4px; letter-spacing: -.01em; }
+h2 { font-size: 12px; text-transform: uppercase; letter-spacing: .07em; color: var(--texte-doux); margin: 0 0 10px; font-weight: 700; }
+
+/* Mise en page : panneau de contrôle à gauche, scène à droite */
+.outil { display: grid; grid-template-columns: 320px 1fr; height: 100vh; }
+.panneau { background: var(--surface); border-right: 1px solid var(--bord); padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 18px; }
+.scene { position: relative; overflow: hidden; }
+.scene canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+.note { color: var(--texte-doux); font-size: 13px; margin: 0; }
+
+.groupe { display: flex; flex-direction: column; gap: 10px; }
+.groupe + .groupe { border-top: 1px solid var(--bord); padding-top: 16px; }
+
+/* Curseurs */
+.curseur { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; align-items: center; }
+.curseur label { font-weight: 600; }
+.curseur output { font-variant-numeric: tabular-nums; font-weight: 650; color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, transparent); padding: 1px 8px; border-radius: 6px; min-width: 52px; text-align: right; }
+.curseur input[type=range] { grid-column: 1 / -1; }
+input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 6px; border-radius: 99px; background: var(--grille-forte); outline: none; margin: 6px 0; }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--surface); border: 3px solid var(--accent); box-shadow: 0 1px 4px rgba(0,0,0,.25); cursor: grab; transition: transform .1s; }
+input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.15); }
+input[type=range]:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 5px color-mix(in srgb, var(--accent) 25%, transparent); }
+
+/* Champs */
+.champ { display: flex; flex-direction: column; gap: 4px; }
+.champ label { font-weight: 600; font-size: 13px; }
+input[type=text], input[type=number], select {
+  width: 100%; padding: 8px 10px; border-radius: 9px; border: 1px solid var(--bord); background: var(--surface-2); outline: none; transition: border-color .15s, box-shadow .15s;
+}
+input[type=text]:focus, input[type=number]:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent); }
+.case { display: flex; align-items: center; gap: 9px; cursor: pointer; user-select: none; }
+.case input { width: 17px; height: 17px; accent-color: var(--accent); margin: 0; }
+
+/* Boutons */
+.boutons { display: flex; gap: 8px; flex-wrap: wrap; }
+.btn { border: 1px solid var(--bord); background: var(--surface-2); padding: 8px 14px; border-radius: 9px; cursor: pointer; font-weight: 600; transition: border-color .15s, transform .1s, filter .15s; }
+.btn:hover { border-color: var(--accent); }
+.btn:active { transform: scale(.97); }
+.btn.principal { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn.principal:hover { filter: brightness(1.08); }
+.btn.petit { padding: 4px 9px; font-size: 13px; }
+.btn.actif { background: color-mix(in srgb, var(--accent) 14%, transparent); border-color: var(--accent); color: var(--accent); }
+
+/* Résultats */
+.stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.stat { background: var(--surface-2); border: 1px solid var(--bord); border-radius: 11px; padding: 9px 11px; }
+.stat .nom { font-size: 12px; color: var(--texte-doux); }
+.stat .val { font-size: 17px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.erreur { color: var(--c2); font-size: 12.5px; }
+
+/* Bulle d'information flottante sur la scène */
+.bulle { position: absolute; pointer-events: none; background: color-mix(in srgb, var(--surface) 92%, transparent); border: 1px solid var(--bord); box-shadow: var(--ombre); border-radius: 10px; padding: 7px 10px; font-size: 13px; font-variant-numeric: tabular-nums; backdrop-filter: blur(6px); white-space: nowrap; }
+.bulle[hidden] { display: none; }
+.legende-scene { position: absolute; left: 16px; top: 14px; display: flex; gap: 8px; flex-wrap: wrap; pointer-events: none; }
+.pastille { background: color-mix(in srgb, var(--surface) 90%, transparent); border: 1px solid var(--bord); border-radius: 999px; padding: 4px 11px; font-size: 13px; font-weight: 600; box-shadow: var(--ombre); }

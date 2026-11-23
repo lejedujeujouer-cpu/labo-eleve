@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title>Calculatrice</title>
+  <link rel="stylesheet" href="../../commun/outil.css">
+  <script src="../../commun/outil.js"></script>
+  <style>
+    body { overflow: auto; }
+    .page { min-height: 100vh; display: grid; grid-template-columns: minmax(320px, 460px) minmax(240px, 340px); gap: 24px; justify-content: center; align-content: center; padding: 24px; }
+    .calc { background: var(--surface); border: 1px solid var(--bord); border-radius: 22px; box-shadow: var(--ombre); padding: 18px; display: flex; flex-direction: column; gap: 14px; }
+    .ecran { background: var(--surface-2); border: 1px solid var(--bord); border-radius: 14px; padding: 12px 14px; display: flex; flex-direction: column; gap: 4px; min-height: 108px; }
+    #saisie { border: 0; background: transparent; outline: none; font-family: "Cambria Math", Cambria, serif; font-size: 22px; color: var(--texte); width: 100%; padding: 0; box-shadow: none; }
+    #resultat { text-align: right; font-size: 34px; font-weight: 700; font-variant-numeric: tabular-nums; min-height: 44px; overflow-x: auto; white-space: nowrap; }
+    #resultat.erreur { font-size: 16px; color: var(--c2); font-weight: 600; }
+    .options { display: flex; gap: 8px; align-items: center; justify-content: space-between; font-size: 13px; color: var(--texte-doux); }
+    .bascule { display: inline-flex; border: 1px solid var(--bord); border-radius: 9px; overflow: hidden; }
+    .bascule button { border: 0; background: var(--surface-2); padding: 5px 12px; font-weight: 650; cursor: pointer; color: var(--texte-doux); }
+    .bascule button.actif { background: var(--accent); color: #fff; }
+    .touches { display: grid; grid-template-columns: repeat(5, 1fr); gap: 7px; }
+    .touches button { height: 46px; border-radius: 11px; border: 1px solid var(--bord); background: var(--surface-2); font-size: 16px; font-weight: 600; cursor: pointer; font-family: "Cambria Math", Cambria, "Segoe UI", serif; transition: transform .06s, border-color .15s; }
+    .touches button:hover { border-color: var(--accent); }
+    .touches button:active { transform: scale(.96); }
+    .touches .chiffre { background: var(--surface); font-size: 18px; }
+    .touches .op { color: var(--accent); }
+    .touches .egal { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .touches .effacer { color: var(--c2); }
+    .historique { background: var(--surface); border: 1px solid var(--bord); border-radius: 22px; box-shadow: var(--ombre); padding: 16px; display: flex; flex-direction: column; gap: 8px; max-height: 560px; }
+    .historique ol { list-style: none; margin: 0; padding: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
+    .historique li { padding: 7px 10px; border-radius: 10px; background: var(--surface-2); cursor: pointer; }
+    .historique li:hover { outline: 1px solid var(--accent); }
+    .historique .calcul { font-family: "Cambria Math", Cambria, serif; color: var(--texte-doux); font-size: 14px; word-break: break-all; }
+    .historique .val { font-weight: 700; text-align: right; font-variant-numeric: tabular-nums; }
+    @media (max-width: 760px) { .page { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="calc">
+      <div class="ecran">
+        <input id="saisie" type="text" autocomplete="off" spellcheck="false" placeholder="Tape un calcul, ex. 2,5 × (3 + 4)²" aria-label="Calcul">
+        <div id="resultat" aria-live="polite"></div>
+      </div>
+      <div class="options">
+        <span>Angles :</span>
+        <span class="bascule" role="group" aria-label="Unité des angles">
+          <button id="mode-deg" class="actif">Degrés</button><button id="mode-rad">Radians</button>
+        </span>
+        <span style="flex:1"></span>
+        <span>Entrée = calculer</span>
+      </div>
+      <div class="touches" id="touches">
+        <button data-i="sin(">sin</button><button data-i="cos(">cos</button><button data-i="tan(">tan</button><button data-i="√(">√</button><button data-i="^">xʸ</button>
+        <button data-i="asin(">sin⁻¹</button><button data-i="acos(">cos⁻¹</button><button data-i="atan(">tan⁻¹</button><button data-i="²">x²</button><button data-i="π">π</button>
+        <button data-i="ln(">ln</button><button data-i="log(">log</button><button data-i="(">(</button><button data-i=")">)</button><button data-a="retour" class="effacer" title="Effacer le dernier caractère">⌫</button>
+        <button class="chiffre" data-i="7">7</button><button class="chiffre" data-i="8">8</button><button class="chiffre" data-i="9">9</button><button class="op" data-i="÷">÷</button><button data-a="tout" class="effacer" title="Tout effacer">C</button>
+        <button class="chiffre" data-i="4">4</button><button class="chiffre" data-i="5">5</button><button class="chiffre" data-i="6">6</button><button class="op" data-i="×">×</button><button data-i="×10^">×10ˣ</button>
+        <button class="chiffre" data-i="1">1</button><button class="chiffre" data-i="2">2</button><button class="chiffre" data-i="3">3</button><button class="op" data-i="−">−</button><button data-i="Rép">Rép</button>
+        <button class="chiffre" data-i="0">0</button><button class="chiffre" data-i=",">,</button><button data-i="%">%</button><button class="op" data-i="+">+</button><button class="egal" data-a="egal">=</button>
+      </div>
+    </div>
+    <div class="historique">
+      <h2>Historique</h2>
+      <p class="note" id="vide-historique">Tes calculs apparaîtront ici. Clique sur un calcul pour le réutiliser.</p>
+      <ol id="liste-historique"></ol>
+    </div>
+  </div>
+  <script src="../../commun/calculatrice-moteur.js"></script>
+  <script src="calculatrice.js"></script>
+</body>
+</html>

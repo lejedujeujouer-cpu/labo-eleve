@@ -1,0 +1,11 @@
+{
+  "id": "travail-pdf",
+  "titre": "Travail à rendre",
+  "description": "PDF à compléter déposé par le professeur : remplis les cases, ton travail est enregistré au fur et à mesure, puis rends-le.",
+  "matiere": "documents",
+  "version": "1.0.0",
+  "icone": "icone.svg",
+  "couleur": "#0d9488",
+  "interne": true,
+  "entree": "index.html"
+}

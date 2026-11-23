@@ -1,0 +1,11 @@
+{
+  "id": "calculatrice",
+  "titre": "Calculatrice",
+  "description": "Calculatrice scientifique : puissances, racines, trigonométrie en degrés ou radians, historique des calculs.",
+  "matiere": "maths",
+  "version": "1.0.0",
+  "icone": "icone.svg",
+  "couleur": "#475569",
+  "motsCles": ["calculatrice", "calcul", "scientifique", "trigonométrie", "racine", "puissance"],
+  "entree": "index.html"
+}

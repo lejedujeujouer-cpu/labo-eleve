@@ -1,0 +1,30 @@
+{
+  "id": "redy",
+  "titre": "Redy (Jeulin)",
+  "description": "Ouvre Redy, le logiciel de TP de Jeulin installé sur ton ordinateur : acquisition des mesures avec les capteurs, tableaux, graphiques et modélisation.",
+  "matiere": "physique-chimie",
+  "niveaux": [
+    "cap1",
+    "cap2",
+    "2pro",
+    "1pro",
+    "tpro"
+  ],
+  "version": "1.0.0",
+  "icone": "icone.svg",
+  "couleur": "#a3263f",
+  "application": "redy",
+  "motsCles": [
+    "jeulin",
+    "redy",
+    "tp",
+    "travaux pratiques",
+    "acquisition",
+    "capteur",
+    "mesures",
+    "expérience",
+    "exao"
+  ],
+  "entree": "index.html",
+  "autoriseEnFocus": true
+}

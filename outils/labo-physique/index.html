@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title>Labo de physique</title>
+  <link rel="stylesheet" href="../../commun/outil.css">
+  <link rel="stylesheet" href="../../commun/labo-virtuel/moteur.css">
+  <script src="../../commun/outil.js"></script>
+  <script src="../../commun/document.js"></script>
+  <script src="../../commun/labo-virtuel/moteur.js"></script>
+  <script src="manips.js"></script>
+</head>
+<body>
+  <script>
+    LaboVirtuel.demarrer({
+      outil: 'labo-physique', titre: 'Labo de physique', icone: '🔭', couleur: '#c2410c',
+      sousTitre: 'Choisis une manipulation. Suis le protocole (ou construis-le toi-même) dans le panneau de droite, réalise le montage et les mesures, puis exploite-les (tableau et graphique).',
+      manips: window.MANIPS_PHYSIQUE,
+    });
+  </script>
+</body>
+</html>

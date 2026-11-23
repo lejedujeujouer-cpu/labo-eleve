@@ -1,0 +1,21 @@
+{
+  "id": "tableur",
+  "titre": "Tableur",
+  "description": "Tableaux de mesures, formules et graphiques avec droite de tendance. Ouvre et enregistre les fichiers Excel.",
+  "matiere": "bureautique",
+  "version": "2.5.0",
+  "icone": "icone.svg",
+  "couleur": "#15803d",
+  "motsCles": [
+    "excel",
+    "tableur",
+    "tableau",
+    "mesures",
+    "graphique",
+    "formule",
+    "régression",
+    "xlsx",
+    "csv"
+  ],
+  "entree": "index.html"
+}

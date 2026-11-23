@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+	<title>Équations à la balance</title>
+	<!-- Outil « equation-anim » d'Arnaud DURAND (mathix.org), licence GPL : voir CREDITS.txt -->
+
+	<script defer src="prechargement.js"></script>
+
+	<script defer src="canvas.js?3a"></script>
+	<script defer src="gestionsouris.js"></script>
+
+
+
+
+	<link rel="stylesheet" href="styles.css?3a" type="text/css" />
+</head>
+
+<body>
+	<progress id="progressBar" value="0" max="100">0%</progress>
+	<div id="config" style='display:none'>
+		<h3>Configurer l'équation</h3>
+		<input class='inputeq' type="number" min="0" step="1" id="nbxg" value="1"> x + 
+		<input class='inputeq' min="0" step="1" type="number" id="nbg" value="1"> = 
+		<input class='inputeq' min="0" step="1" type="number" id="nbxd" value="1"> x + 
+		<input class='inputeq' min="0" step="1" type="number" id="nbd" value="1">
+		<br/><br/>
+		<input style="font-size:20px; padding: 10px 20px; cursor:pointer; border-radius: 8px; border: none; background: #3498db; color: white;" type="button" value="Valider" onclick='configperso()'>
+	</div>
+	<div id='divcanvas'>
+		<canvas id="mon_canvas" width="600" height="400">
+			Désolé, votre navigateur ne supporte pas le canvas.
+		</canvas>
+	</div>
+	<div id='comgauche'>
+		<a class="btn-action" onclick="axg();" title="Ajouter x"><img src="plus.png"><img src="poidsx.png"></a>
+		<a class="btn-action" onclick="sxg();" title="Retirer x"><img src="moins.png"><img src="poidsx.png"></a>
+		<a class="btn-action" onclick="ag();" title="Ajouter 1"><img src="plus.png"><img src="poids.png"></a>
+		<a class="btn-action" onclick="sg();" title="Retirer 1"><img src="moins.png"><img src="poids.png"></a>
+	</div>
+	<div id='comdroite'>
+		<a class="btn-action" onclick="axd();" title="Ajouter x"><img src="plus.png"><img src="poidsx.png"></a>
+		<a class="btn-action" onclick="sxd();" title="Retirer x"><img src="moins.png"><img src="poidsx.png"></a>
+		<a class="btn-action" onclick="ad();" title="Ajouter 1"><img src="plus.png"><img src="poids.png"></a>
+		<a class="btn-action" onclick="sd();" title="Retirer 1"><img src="moins.png"><img src="poids.png"></a>
+	</div>
+	<div id='op'></div>
+	<div id='equation'>
+		<h2>Équation</h2>
+		<div class="equation-actions">
+			<a class="btn-equation" onclick="initialisation();" title="Nouvelle équation au hasard">
+				<img src="loading.png">
+				<span>Nouveau défi</span>
+			</a>
+			<a class="btn-equation" onclick="menuperso();" title="Créer ma propre équation">
+				<span class="icon">✏️</span>
+				<span>Personnaliser</span>
+			</a>
+		</div>
+		<table id='liste-eq'></table>
+	</div>
+	<div id="msg">
+		Outil créé par <b>Arnaud DURAND</b> &copy; 08/07/20 GPL v5 - mathix.org (www.mathix.org/equation-anim) · intégré à Labo Élève avec la mention de son auteur
+	</div>
+</body>
+
+
+</html>

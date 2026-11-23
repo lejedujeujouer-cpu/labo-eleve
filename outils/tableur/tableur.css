@@ -1,0 +1,127 @@
+body { overflow: hidden; }
+[hidden] { display: none !important; }
+
+/* Zone Nom + barre de formule */
+.barre-formule { display: flex; align-items: center; gap: 6px; padding: 4px 8px; background: var(--surface); border-bottom: 1px solid var(--bord); flex: none; }
+.zone-nom { width: 92px !important; padding: 3px 6px !important; font-size: 13px; border-radius: 3px !important; }
+.boutons-formule { display: flex; border-left: 1px solid var(--bord); border-right: 1px solid var(--bord); padding: 0 4px; }
+.boutons-formule button { border: 0; background: transparent; width: 26px; height: 24px; cursor: pointer; color: var(--texte-doux); font-size: 14px; border-radius: 4px; }
+.boutons-formule button:hover { background: var(--surface-2); color: var(--texte); }
+.boutons-formule i { font-family: "Cambria Math", Cambria, serif; font-size: 15px; }
+#saisie-formule { flex: 1; padding: 3px 8px !important; font-family: Calibri, "Segoe UI", sans-serif; font-size: 14px; border-radius: 3px !important; }
+
+/* Grille */
+.corps { flex: 1; display: flex; min-height: 0; }
+.zone-grille { flex: 1; overflow: auto; position: relative; background: #fff; outline: none; }
+:root[data-theme="dark"] .zone-grille { background: var(--surface); }
+.contenu-grille { position: relative; width: max-content; }
+.grille { border-collapse: separate; border-spacing: 0; table-layout: fixed; font-family: Calibri, "Segoe UI", sans-serif; font-size: 14.5px; user-select: none; color: #1b1f2a; }
+:root[data-theme="dark"] .grille { color: var(--texte); }
+.grille th, .grille td { height: 22px; padding: 0 4px; white-space: nowrap; overflow: hidden; text-overflow: clip; }
+.grille td { background: inherit; cursor: cell; border-right: 1px solid #e1e1e1; border-bottom: 1px solid #e1e1e1; }
+:root[data-theme="dark"] .grille td { border-color: #2c3450; }
+.sans-quadrillage .grille td { border-color: transparent; }
+.grille th { position: sticky; background: #f3f3f3; color: #444; font-weight: 400; font-size: 12.5px; text-align: center; z-index: 2; border-right: 1px solid #d4d4d4; border-bottom: 1px solid #d4d4d4; }
+:root[data-theme="dark"] .grille th { background: var(--surface-2); color: var(--texte-doux); border-color: var(--bord); }
+.grille thead th { top: 0; position: sticky; }
+.grille tbody th { left: 0; width: 40px; min-width: 40px; z-index: 1; }
+.grille thead th:first-child { left: 0; z-index: 3; width: 40px; }
+.grille th.actif { background: #d3e3d6; color: var(--appli); font-weight: 600; border-bottom-color: var(--appli); }
+.grille thead th { cursor: s-resize; }
+.grille tbody th { cursor: e-resize; }
+.grille .poignee-col { position: absolute; top: 0; right: -3px; width: 7px; height: 100%; cursor: col-resize; z-index: 4; }
+.grille td.nombre { text-align: right; }
+.grille td.erreur { color: #c00000; text-align: center; }
+.grille td.dans-selection { background-image: linear-gradient(rgba(30, 113, 69, .10), rgba(30, 113, 69, .10)); }
+
+/* Cadre de sélection et poignée de recopie (comme dans les tableurs) */
+.cadre-selection { position: absolute; border: 2px solid var(--appli); pointer-events: none; z-index: 5; }
+.poignee { position: absolute; right: -5px; bottom: -5px; width: 8px; height: 8px; background: var(--appli); border: 1px solid #fff; pointer-events: auto; cursor: crosshair; }
+.cadre-recopie { position: absolute; border: 2px dashed #666; pointer-events: none; z-index: 5; }
+.editeur-cellule { position: absolute; z-index: 6; border: 2px solid var(--appli) !important; border-radius: 0 !important; padding: 0 3px !important; font: 14.5px Calibri, "Segoe UI", sans-serif !important; background: #fff !important; color: #1b1f2a !important; box-shadow: 0 3px 10px rgba(0,0,0,.15) !important; outline: none; }
+
+/* Graphiques */
+.panneau-graphiques { width: min(460px, 42vw); border-left: 1px solid var(--bord); background: var(--surface-2); overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 10px; }
+.entete-panneau { display: flex; justify-content: space-between; align-items: center; }
+.carte-graphique { background: var(--surface); border: 1px solid var(--bord); border-radius: 8px; padding: 10px; }
+.carte-graphique .cadre-canvas { position: relative; height: 290px; }
+.carte-graphique .equation { font-family: "Cambria Math", Cambria, serif; font-size: 15px; margin: 6px 4px 2px; white-space: pre-line; }
+.carte-graphique .actions-graphique { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+
+/* Onglets des feuilles (en bas, comme dans les tableurs) */
+.onglets-feuilles { display: flex; align-items: stretch; gap: 2px; padding: 0 6px; background: var(--surface-2); border-top: 1px solid var(--bord); height: 30px; flex: none; }
+.liste-onglets { display: flex; gap: 1px; overflow-x: auto; }
+.onglet { border: 0; background: transparent; padding: 0 16px; font-size: 13px; cursor: pointer; white-space: nowrap; display: inline-flex; gap: 6px; align-items: center; color: var(--texte); }
+.onglet:hover { background: var(--surface); }
+.onglet.actif { background: var(--surface); color: var(--appli); font-weight: 650; border-bottom: 3px solid var(--appli); }
+.onglet .suppr-feuille { border: 0; background: none; color: var(--texte-doux); cursor: pointer; padding: 0 2px; font-size: 14px; }
+.br.dec { font-size: 11.5px; font-weight: 600; letter-spacing: -.3px; }
+
+/* Aide à la saisie des formules */
+.aide-liste { position: fixed; z-index: 80; width: 370px; max-height: 260px; overflow-y: auto; background: var(--surface); border: 1px solid var(--bord); border-radius: 6px; box-shadow: 0 8px 24px rgba(0,0,0,.2); padding: 3px; font-size: 13px; }
+.aide-item { display: flex; flex-direction: column; padding: 5px 8px; border-radius: 4px; cursor: pointer; }
+.aide-item b { font-family: Calibri, "Segoe UI", sans-serif; letter-spacing: .02em; }
+.aide-item span { font-size: 11.5px; color: var(--texte-doux); }
+.aide-item.choisi, .aide-item:hover { background: color-mix(in srgb, var(--appli) 14%, var(--surface)); }
+.aide-bulle { position: fixed; z-index: 80; max-width: 460px; background: #fffbe6; color: #222; border: 1px solid #c9b458; border-radius: 4px; padding: 4px 8px; font: 13px Calibri, "Segoe UI", sans-serif; box-shadow: 0 3px 10px rgba(0,0,0,.15); }
+.aide-bulle small { display: block; color: #555; font-size: 11.5px; margin-top: 2px; }
+.fenetre-fonction { width: min(620px, 94vw); }
+.liste-fonctions { height: 190px; overflow-y: auto; border: 1px solid var(--bord); border-radius: 6px; padding: 3px; font-family: Calibri, "Segoe UI", sans-serif; }
+.ligne-fonction { padding: 4px 8px; border-radius: 4px; cursor: pointer; }
+.ligne-fonction.choisi { background: var(--appli); color: #fff; }
+.description-fonction { min-height: 76px; font-size: 13.5px; }
+.description-fonction p { margin: 4px 0; }
+.description-fonction code { background: var(--surface-2); padding: 1px 5px; border-radius: 3px; }
+
+/* Lignes et colonnes masquées, hauteur des lignes, volets figés, filtres */
+.grille td.masquee, .grille th.masquee { padding: 0 !important; font-size: 0 !important; border-right: 2px double #8a8a8a !important; }
+.grille tbody th { position: sticky; }
+.grille .poignee-lig { position: absolute; left: 0; bottom: -3px; width: 100%; height: 7px; cursor: row-resize; z-index: 4; }
+.grille td.renvoi { white-space: normal; word-break: break-word; vertical-align: top; }
+.grille td.fige, .grille th.fige { position: sticky; z-index: 2; background-color: #fff; }
+:root[data-theme="dark"] .grille td.fige { background-color: var(--surface); }
+.grille .bord-fige-bas { border-bottom: 2px solid #7a7a7a !important; }
+.grille .bord-fige-droite { border-right: 2px solid #7a7a7a !important; }
+.grille td.avec-filtre { position: relative; padding-right: 22px; }
+.btn-filtre { position: absolute; right: 2px; top: 50%; transform: translateY(-50%); width: 17px; height: 17px; border: 1px solid #a0a0a0; border-radius: 2px; background: #f3f3f3; color: #333; font-size: 10px; line-height: 1; padding: 0; cursor: pointer; }
+.btn-filtre.actif { background: var(--appli); color: #fff; border-color: var(--appli); }
+.menu-filtre { width: 250px; }
+.menu-filtre .valeurs-filtre { max-height: 220px; overflow-y: auto; border: 1px solid var(--bord); border-radius: 5px; margin: 4px 2px; padding: 3px 6px; }
+.menu-filtre label { display: flex; gap: 7px; align-items: center; font-size: 13px; padding: 2px 0; cursor: pointer; }
+.menu-filtre .boutons-fenetre { padding: 4px 2px 2px; }
+.grille td.fige.avec-filtre { position: sticky; }
+
+/* Références en couleur pendant la saisie d'une formule */
+.champ-formule { position: relative; flex: 1; display: flex; }
+.champ-formule #saisie-formule { flex: 1; width: 100%; }
+.miroir-formule { position: absolute; pointer-events: none; overflow: hidden; white-space: pre; display: flex; align-items: center; border-style: solid; border-color: transparent; color: #1b1f2a; z-index: 7; }
+:root[data-theme="dark"] .champ-formule .miroir-formule { color: var(--texte); }
+.miroir-formule > span { display: inline-block; }
+input.formule-coloree { color: transparent !important; caret-color: #000; z-index: 8; background: transparent !important; }
+.champ-formule input.formule-coloree { position: relative; }
+:root[data-theme="dark"] .champ-formule input.formule-coloree { caret-color: #fff; }
+input.formule-coloree::selection { color: transparent; background: rgba(0, 110, 220, .25); }
+.contenu-grille .miroir-formule { background: #fff; }
+.champ-formule .miroir-formule { background: var(--surface); border-radius: 3px; }
+.cadre-reference { position: absolute; border: 2px solid; pointer-events: none; z-index: 5; }
+
+/* Graphique sélectionné et onglet « Création de graphique » */
+.carte-graphique { cursor: pointer; transition: box-shadow .15s, border-color .15s; }
+.carte-graphique:hover { border-color: color-mix(in srgb, var(--appli) 45%, var(--bord)); }
+.carte-graphique.choisie { border: 2px solid var(--appli); box-shadow: 0 0 0 3px color-mix(in srgb, var(--appli) 20%, transparent); }
+.onglets-ruban button.contextuel { color: #fff; background: #b8860b; border-radius: 6px 6px 0 0; margin-left: 8px; }
+.onglets-ruban button.contextuel.actif { color: #8a6508; background: color-mix(in srgb, #f2c94c 30%, var(--surface)); border-bottom-color: #b8860b; }
+.ruban-graphique { border-top: 2px solid #e0b33a; }
+.champ-ruban { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--texte-doux); }
+.champ-ruban span { min-width: 70px; }
+.champ-ruban input[type=text] { width: 140px; height: 24px; padding: 0 6px; border: 1px solid var(--bord); border-radius: 4px; background: var(--surface); color: var(--texte); font-size: 12.5px; }
+.champ-ruban input[type=number] { width: 54px; height: 24px; padding: 0 4px; border: 1px solid var(--bord); border-radius: 4px; background: var(--surface); color: var(--texte); font-size: 12.5px; }
+.ligne .champ-ruban span { min-width: 38px; }
+.case-ruban { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--texte); cursor: pointer; }
+.info-ruban { font-size: 12px; color: var(--texte-doux); padding: 0 4px; }
+.couleurs-graphique { max-height: 70px; overflow-y: auto; }
+.couleurs-graphique label { display: flex; align-items: center; gap: 6px; font-size: 12px; }
+.couleurs-graphique input[type=color] { width: 30px; height: 20px; padding: 0; border: 1px solid var(--bord); border-radius: 3px; cursor: pointer; }
+
+.ruban-graphique .champ-ruban select { max-width: 150px; }
+.ligne .champ-ruban span { min-width: 30px; }
