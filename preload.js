@@ -2,6 +2,7 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('labo', {
+  ecran: { capturer: (rect) => ipcRenderer.invoke('ecran:capturer', rect), pressePapier: () => ipcRenderer.invoke('ecran:presse-papier') },
   listerOutils: () => ipcRenderer.invoke('outils:lister'),
   importerOutils: () => ipcRenderer.invoke('outils:importer'),
   importerDossier: () => ipcRenderer.invoke('outils:importer-dossier'),

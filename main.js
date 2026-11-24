@@ -2,7 +2,7 @@
 // - sert l'interface et les outils via le protocole interne app://local/
 // - gère l'installation / mise à jour / suppression des outils
 
-const { app, BrowserWindow, protocol, ipcMain, dialog, shell, Menu, net, webFrameMain, session, globalShortcut } = require('electron');
+const { app, BrowserWindow, protocol, ipcMain, dialog, shell, Menu, net, webFrameMain, session, globalShortcut, clipboard } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
@@ -998,6 +998,22 @@ function enregistrerProtocole() {
 // ---------- IPC ----------
 
 function enregistrerIPC() {
+  // Image pour une réponse : capture d'une partie de la fenêtre (l'outil ouvert à côté) ou image du presse-papiers
+  const imageReponse = (img) => { if (img.isEmpty()) return null; const t = img.getSize(); return (t.width > 1600 ? img.resize({ width: 1600, quality: 'best' }) : img).toDataURL(); };
+  ipcMain.handle('ecran:capturer', async (e, r = {}) => {
+    try {
+      const n = (v) => Math.max(0, Math.round(Number(v) || 0));
+      const rect = { x: n(r.x), y: n(r.y), width: n(r.width), height: n(r.height) };
+      if (rect.width < 20 || rect.height < 20) return { ok: false, message: 'Rien à capturer : ouvre d’abord un outil à côté.' };
+      const image = imageReponse(await e.sender.capturePage(rect));
+      return image ? { ok: true, image } : { ok: false, message: 'Capture vide.' };
+    } catch (err) { return { ok: false, message: 'Capture impossible : ' + err.message }; }
+  });
+  ipcMain.handle('ecran:presse-papier', () => {
+    if (!clipboard || typeof clipboard.readImage !== 'function') return { ok: false, message: 'Appuie sur Ctrl+V pour coller ton image (après l’avoir copiée).' };
+    const image = imageReponse(clipboard.readImage());
+    return image ? { ok: true, image } : { ok: false, message: 'Aucune image copiée : copie d’abord une image (ou fais une capture), puis clique sur « Coller ».' };
+  });
   ipcMain.handle('outils:lister', () =>
     [...outilsDisponibles().values()].map(({ dossier, ...o }) => o)
   );

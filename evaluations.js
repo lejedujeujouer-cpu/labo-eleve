@@ -360,14 +360,20 @@ function tableauConfig(type, t = {}) {
     m: t.m === undefined ? 0.08 : borne(t.m, 0, 0.3), ...(Array.isArray(t.px) && t.px.length === n ? { px: t.px.map((x) => borne(x, 0, 1)) } : {}), ...calage(t, 1 + (signe ? 1 : 0) + (varie ? 1 : 0)) };
 }
 const zonesValides = (z) => (Array.isArray(z) ? z : []).slice(0, 60).map((c, i) => {
-  const type = ['valeurs', 'variations', 'arbre'].includes(c.type) ? c.type : 'lignes';
+  const type = ['valeurs', 'variations', 'arbre', 'image'].includes(c.type) ? c.type : 'lignes';
   return { id: /^[a-z0-9]{1,16}$/i.test(c.id || '') ? c.id : 'z' + crypto.randomBytes(4).toString('hex'), ...rectangle(c), nom: texte(c.nom, 40) || `Question ${i + 1}`, type,
-    ...etiquettes(c), ...(texte(c.correction, 2000) ? { correction: texte(c.correction, 2000) } : {}), ...(c.rep && typeof c.rep === 'object' ? { rep: rectangle(c.rep) } : {}), ...(type !== 'lignes' ? { tab: tableauConfig(type, c.tab || {}) } : {}) };
+    ...etiquettes(c), ...(texte(c.correction, 2000) ? { correction: texte(c.correction, 2000) } : {}), ...(c.rep && typeof c.rep === 'object' ? { rep: rectangle(c.rep) } : {}), ...(!['lignes', 'image'].includes(type) ? { tab: tableauConfig(type, c.tab || {}) } : {}) };
 });
 // Outils que l'élève peut ouvrir à côté de l'évaluation (double fenêtre)
 const OUTILS_EXO = ['calculatrice', 'calculatrice-numworks', 'tableur', 'geogebra', 'python', 'tableau-periodique'];
 // Réponse « tableau » : { cases: { 'ligne-colonne': valeur } } ou { x, s, z, f: [textes], fl: ['h'|'b'|'c'|''] }
+// image collée ou capturée par l'élève (data URL, 1,5 Mo au plus)
+const IMG_REP = /^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/]+=*$/;
+// surlignages de l'élève sur la feuille : [{ p, x, y, l, h }]
+const surlValides = (s) => (Array.isArray(s) ? s : []).slice(0, 300).filter((x) => x && typeof x === 'object')
+  .map((x) => ({ p: Math.max(1, Math.min(500, Math.round(Number(x.p) || 1))), x: borne(x.x, 0, 1), y: borne(x.y, 0, 1), l: borne(x.l, 0, 1), h: borne(x.h, 0, 1) })).filter((x) => x.l > 0 && x.h > 0);
 function tableauValide(v) {
+  if (typeof v.img === 'string') return v.img.length <= 1500000 && IMG_REP.test(v.img) ? { img: v.img } : {};
   const r = {};
   if (v.cases && typeof v.cases === 'object') { r.cases = {}; for (const [k, x] of Object.entries(v.cases).slice(0, 200)) if (/^\d{1,2}-\d{1,2}$/.test(k) && texte(x, 30)) r.cases[k] = texte(x, 30); }
   for (const k of ['x', 's', 'z', 'f']) if (Array.isArray(v[k])) r[k] = v[k].slice(0, 8).map((x) => texte(x, 30));
@@ -379,6 +385,7 @@ const repNonVide = (v) => {
   if (v === '' || v === null || v === undefined) return false;
   if (Array.isArray(v)) return v.length > 0;
   if (typeof v !== 'object') return !!String(v).trim();
+  if (v.img) return true;
   const plein = (x) => String(x ?? '').trim() !== '';
   return Object.values(v.cases || {}).some(plein) || ['x', 's', 'z', 'f', 'fl'].some((k) => (v[k] || []).some(plein)) || ['n', 'p'].some((k) => Object.values(v[k] || {}).some(plein));
 };
@@ -424,7 +431,7 @@ function creerEvaluations({ app, ipcMain, espace, lireConfig, edition, dossierDo
   function correctionExercice(s, eleveId) {
     const copie = lireCopie(s, eleveId) || {};
     const n = notesDe(s, eleveId);
-    return { titre: s.titre, modele: 'exercice', date: new Date().toISOString(), zones: s.zones, reponses: copie.reponses || {}, calculs: (copie.calculs || []).slice(-400), notes: n.questions || {}, general: n.general || '' };
+    return { titre: s.titre, modele: 'exercice', date: new Date().toISOString(), zones: s.zones, reponses: copie.reponses || {}, surl: copie.surl || [], calculs: (copie.calculs || []).slice(-400), notes: n.questions || {}, general: n.general || '' };
   }
   function stockerPdf(donnees) {
     if (donnees.length > 25 * 1024 * 1024) throw new Error('PDF trop lourd (25 Mo au maximum).');
@@ -910,7 +917,7 @@ function creerEvaluations({ app, ipcMain, espace, lireConfig, edition, dossierDo
     const precedente = lireJson(brouillon(m.sid), null);
     const valides = (Array.isArray(d.valides) ? d.valides : []).map(Number).filter((n) => Number.isInteger(n) && n >= 0 && n < 1000).slice(0, 200);
     const titre = (precedente && precedente.titre) || (lireJson(partage(m.classeId, m.sid, 'session.json'), {}) || {}).titre || 'Évaluation';
-    const copie = { nom: m.nom, sid: m.sid, classeId: m.classeId, eleveId: m.eleveId, titre, reponses, calculs, valides, fini: !!d.fini || !!(precedente && precedente.fini), maj: new Date().toISOString() };
+    const copie = { nom: m.nom, sid: m.sid, classeId: m.classeId, eleveId: m.eleveId, titre, reponses, calculs, valides, surl: surlValides(d.surl), fini: !!d.fini || !!(precedente && precedente.fini), maj: new Date().toISOString() };
     if (precedente && precedente.fini) return { copie: precedente, deja: true }; // copie rendue : plus de changement
     ecrireJson(brouillon(m.sid), copie);
     try { ecrireJson(partage(m.classeId, m.sid, 'copies', m.eleveId + '.json'), copie); } catch { return { copie, horsLigne: true }; }
@@ -1427,7 +1434,7 @@ function creerEvaluations({ app, ipcMain, espace, lireConfig, edition, dossierDo
     if (!ID.test(id || '')) throw new Error('Module invalide.');
     const reponses = {};
     for (const [k, v] of Object.entries(d.reponses || {})) { if (!/^\d{1,3}$/.test(k)) continue; if (Array.isArray(v)) reponses[k] = lignesValides(v); else if (v && typeof v === 'object') reponses[k] = tableauValide(v); }
-    const copie = { reponses, valides: (Array.isArray(d.valides) ? d.valides : []).map(Number).filter((n) => Number.isInteger(n) && n >= 0 && n < 200), fini: !!d.fini, auto: d.auto && typeof d.auto === 'object' ? Object.fromEntries(Object.entries(d.auto).filter(([k, v]) => /^\d{1,3}$/.test(k) && ['juste', 'partiel', 'faux'].includes(v))) : {}, maj: new Date().toISOString() };
+    const copie = { reponses, surl: surlValides(d.surl), valides: (Array.isArray(d.valides) ? d.valides : []).map(Number).filter((n) => Number.isInteger(n) && n >= 0 && n < 200), fini: !!d.fini, auto: d.auto && typeof d.auto === 'object' ? Object.fromEntries(Object.entries(d.auto).filter(([k, v]) => /^\d{1,3}$/.test(k) && ['juste', 'partiel', 'faux'].includes(v))) : {}, maj: new Date().toISOString() };
     ecrireJson(brouillonModule(el, id), copie);
     return { copie };
   });
@@ -1448,4 +1455,4 @@ function creerEvaluations({ app, ipcMain, espace, lireConfig, edition, dossierDo
   return { tour, instancier, questionValide, estJuste };
 }
 
-module.exports = { referentielValide, niveauDe, zonesValides, lignesValides, tableauValide, creerEvaluations, EXEMPLES, questionValide, instancier, estJuste, tirerQuestions, questionsDuClasseur, questionsDuJson, feuillesDeLaBanque, cle };
+module.exports = { surlValides, referentielValide, niveauDe, zonesValides, lignesValides, tableauValide, creerEvaluations, EXEMPLES, questionValide, instancier, estJuste, tirerQuestions, questionsDuClasseur, questionsDuJson, feuillesDeLaBanque, cle };

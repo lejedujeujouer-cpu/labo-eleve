@@ -409,6 +409,11 @@ function fermerVolet2(force = false) {
 }
 $('#btn-cote-a-cote').addEventListener('click', ouvrirChoixVolet2);
 // Un outil demande d'ouvrir un outil autorisé à côté (ex. calculatrice pendant une évaluation « exercice »).
+window.capturerOutilACote = async () => {
+  if (!etat.outil2 || $('#volet2').hidden) return { ok: false, message: 'Ouvre d’abord un outil à côté (GeoGebra, NumWorks…), puis capture-le.' };
+  const r = $('#cadre2').getBoundingClientRect();
+  return window.labo.ecran.capturer({ x: r.left, y: r.top, width: r.width, height: r.height });
+};
 window.ouvrirOutilACote = (id) => { const o = etat.outils.find((x) => x.id === id); if (!pourVolet2(o)) return false; if (etat.outil2 && etat.outil2.id === id) return true; ouvrirVolet2({ outil: o, titre: o.titre }); return true; };
 $('#btn-volet2-changer').addEventListener('click', ouvrirChoixVolet2);
 $('#btn-volet2-fermer').addEventListener('click', () => fermerVolet2());

@@ -376,7 +376,7 @@ function creerEspaceClasses({ ipcMain, dialog, obtenirFenetre, lireConfig, penda
     const valeurs = {};
     for (const [k, v] of Object.entries((c && c.valeurs) || {}).slice(0, 400)) {
       if (!ID.test(k)) continue;
-      valeurs[k] = typeof v === 'boolean' ? v : String(v ?? '').slice(0, 20000); // une réponse au format « exercice » (JSON) peut faire plusieurs lignes
+      valeurs[k] = typeof v === 'boolean' ? v : String(v ?? '').slice(0, String(v ?? '').startsWith('{"img":') ? 1600000 : 20000); // une réponse au format « exercice » (JSON) peut faire plusieurs lignes
     }
     const historique = (Array.isArray(c && c.historique) ? c.historique : []).slice(-5000).map((h) => ({
       t: String(h.t || '').slice(0, 30), c: String(h.c || '').slice(0, 60),

@@ -18,7 +18,58 @@ const tm = (t) => (EQ && EQ.texteAvecMaths ? EQ.texteAvecMaths(t) : echapper(t))
 const VERDICTS = { juste: ['✔', 'Juste'], partiel: ['◐', 'En partie'], faux: ['✘', 'Faux'] };
 // Travail à rendre : remarques de l'enseignant par question
 const VERDICTS_TRAVAIL = { juste: ['✔', 'Validé'], partiel: ['◐', 'À compléter'], faux: ['✘', 'Faux'] };
-const TYPES = { lignes: '✏️ Réponse rédigée', valeurs: '🔢 Tableau de valeurs', variations: '📈 Tableau de variations', arbre: '🌳 Arbre de probabilités' };
+const TYPES = { lignes: '✏️ Réponse rédigée', valeurs: '🔢 Tableau de valeurs', variations: '📈 Tableau de variations', arbre: '🌳 Arbre de probabilités', image: '🖼️ Image / capture d’écran' };
+// Réponse « image » : { img: 'data:image/…;base64,…' } (capture de l'outil ouvert à côté, image collée ou choisie)
+const imgSrc = (v) => (v && typeof v.img === 'string' && /^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/]+=*$/.test(v.img) ? v.img : '');
+const EXEMPLE_IMG = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 90"><rect width="160" height="90" fill="#f8fafc" stroke="#94a3b8" stroke-dasharray="4 3"/><path d="M14 76 H150 M20 82 V10" stroke="#64748b" stroke-width="1.5"/><path d="M22 70 C50 10 80 10 100 45 S135 80 148 20" fill="none" stroke="#2563eb" stroke-width="2.5"/><text x="80" y="88" font-size="9" text-anchor="middle" fill="#475569" font-family="sans-serif">image de l’élève</text></svg>');
+// Image d'une réponse : 1400 px au plus, en JPEG (fond blanc), pour que la copie reste légère
+function chargerImage(url) { return new Promise((ok, ko) => { const im = new Image(); im.onload = () => ok(im); im.onerror = () => ko(new Error('Image illisible.')); im.src = url; }); }
+async function compresserImage(url, max = 1400) {
+  const im = await chargerImage(url);
+  const k = Math.min(1, max / Math.max(im.naturalWidth, im.naturalHeight));
+  const cv = document.createElement('canvas'); cv.width = Math.max(1, Math.round(im.naturalWidth * k)); cv.height = Math.max(1, Math.round(im.naturalHeight * k));
+  const cx = cv.getContext('2d'); cx.fillStyle = '#fff'; cx.fillRect(0, 0, cv.width, cv.height); cx.drawImage(im, 0, 0, cv.width, cv.height);
+  for (const q of [0.88, 0.75, 0.6, 0.45]) { const u = cv.toDataURL('image/jpeg', q); if (u.length < 1400000) return u; }
+  return compresserImage(url, Math.round(max * 0.6));
+}
+// Recadrer : l'élève trace le rectangle à garder (rien de tracé : toute l'image). Renvoie l'image, ou null (annulé).
+function recadrerImage(url) {
+  return new Promise((fin) => {
+    const fond = document.createElement('div'); fond.className = 'ex-loupe-fond ex-recadre';
+    fond.innerHTML = `<div class="ex-loupe" role="dialog" aria-label="Recadrer l’image">
+      <div class="ex-loupe-tete"><b>✂ Garde seulement la partie utile</b><span class="aide" style="margin:0">Trace un rectangle avec la souris autour du graphique (ou garde toute l’image).</span><span class="espace"></span>
+        <button class="btn" id="rc-annuler">Annuler</button><button class="btn" id="rc-tout">Toute l’image</button><button class="btn principal" id="rc-ok" disabled>✂ Garder cette partie</button></div>
+      <div class="ex-recadre-corps"><div class="ex-recadre-boite"><img src="${url}" alt="" draggable="false"><div class="ex-recadre-sel" hidden></div></div></div></div>`;
+    document.body.append(fond);
+    const img = fond.querySelector('img'), sel = fond.querySelector('.ex-recadre-sel'), boite = fond.querySelector('.ex-recadre-boite');
+    let r = null, g = null;
+    const pos = (e) => { const b = img.getBoundingClientRect(); return { x: Math.min(1, Math.max(0, (e.clientX - b.left) / b.width)), y: Math.min(1, Math.max(0, (e.clientY - b.top) / b.height)) }; };
+    const fermer = (v) => { document.removeEventListener('mousemove', bouge); document.removeEventListener('mouseup', lache); document.removeEventListener('keydown', clavier); fond.remove(); fin(v); };
+    const bouge = (e) => { if (!g) return; const m = pos(e); r = { x: Math.min(m.x, g.x), y: Math.min(m.y, g.y), l: Math.abs(m.x - g.x), h: Math.abs(m.y - g.y) }; sel.hidden = false; placer(sel, r); };
+    const lache = () => { if (!g) return; g = null; const ok = r && r.l > 0.02 && r.h > 0.02; fond.querySelector('#rc-ok').disabled = !ok; if (!ok) { r = null; sel.hidden = true; } };
+    const clavier = (e) => { if (e.key === 'Escape') { e.stopPropagation(); fermer(null); } };
+    boite.addEventListener('mousedown', (e) => { if (e.button !== 0) return; e.preventDefault(); g = pos(e); r = null; });
+    document.addEventListener('mousemove', bouge); document.addEventListener('mouseup', lache); document.addEventListener('keydown', clavier);
+    fond.querySelector('#rc-annuler').addEventListener('click', () => fermer(null));
+    fond.querySelector('#rc-tout').addEventListener('click', () => fermer(url));
+    fond.querySelector('#rc-ok').addEventListener('click', () => {
+      if (!r) return fermer(url);
+      const W = img.naturalWidth, H = img.naturalHeight, cv = document.createElement('canvas');
+      cv.width = Math.max(1, Math.round(r.l * W)); cv.height = Math.max(1, Math.round(r.h * H));
+      cv.getContext('2d').drawImage(img, r.x * W, r.y * H, cv.width, cv.height, 0, 0, cv.width, cv.height);
+      fermer(cv.toDataURL('image/png'));
+    });
+  });
+}
+// Surlignages de l'élève sur la feuille : [{ p: page, x, y, l, h }] (fractions de la page)
+function dessinerSurl(pages, surl, supprimer) {
+  (surl || []).forEach((s, k) => {
+    const p = pages[s.p - 1]; if (!p) return;
+    const el = document.createElement('div'); el.className = 'ex-surl'; el.dataset.surl = k; placer(el, s);
+    if (supprimer) { el.title = 'Clique pour effacer ce surlignage'; el.addEventListener('mousedown', (e) => { e.stopPropagation(); e.preventDefault(); supprimer(k); }); }
+    p.calque.prepend(el);
+  });
+}
 const OUTILS = { calculatrice: '🧮 Calculatrice', 'calculatrice-numworks': '🔢 NumWorks', tableur: '📊 Tableur', geogebra: '📐 GeoGebra', python: '🐍 Python', 'tableau-periodique': '⚛️ Tableau périodique' };
 const typeDe = (z) => (TYPES[z.type] ? z.type : 'lignes');
 function ecran(ic, titre, texte) { app.innerHTML = `<div class="centre"><div class="ic">${ic}</div><h1>${echapper(titre)}</h1><p>${texte}</p></div>`; }
@@ -34,6 +85,7 @@ const ligneHtml = (l) => (l.m ? `<span class="maths">${maths(l.t)}</span>` : `<s
 const nonVide = (v) => {
   if (!v) return false;
   if (Array.isArray(v)) return v.length > 0;
+  if (v.img) return !!imgSrc(v);
   if (v.cases) return Object.values(v.cases).some((x) => String(x || '').trim());
   return ['x', 's', 'z', 'f', 'fl'].some((k) => (v[k] || []).some((x) => String(x || '').trim())) || ['n', 'p'].some((k) => Object.values(v[k] || {}).some((x) => String(x || '').trim()));
 };
@@ -192,6 +244,7 @@ function exempleRep(z) {
     return { n, p };
   }
   if (type === 'lignes') return [{ t: 'Exemple de réponse de l’élève :' }, { t: 'C(0) = 2 × 0^2 − 20 × 0 + 80 = 80', m: true }];
+  if (type === 'image') return { img: EXEMPLE_IMG, exemple: true };
   if (type === 'valeurs') { const cases = {}; for (let r = 0; r < t.l; r++) for (let c = 0; c < t.c; c++) if (!((t.d || [])[r] || [])[c]) cases[`${r}-${c}`] = String(10 + r * 7 + c); return { cases }; }
   const n = t.n;
   return { x: Array.from({ length: n }, (_v, k) => ((t.x || [])[k] ? '' : String(k * 5))), z: Array.from({ length: n }, (_v, k) => (k > 0 && k < n - 1 ? '0' : '')),
@@ -204,6 +257,7 @@ function repHtml(z, v) {
   if (t === 'arbre') return `<div class="ex-var-carte">${svgArbre(z.tab, v || {}, 460, Math.min(320, Math.max(150, 46 * z.tab.branches ** z.tab.niveaux)), { max: 17 })}</div>`;
   if (t === 'valeurs') return tableValeursHtml(z.tab, v || {});
   if (t === 'variations') return `<div class="ex-var-carte">${svgVariations(z.tab, v || {})}</div>`;
+  if (t === 'image') return imgSrc(v) ? `<img class="ex-img-carte" src="${imgSrc(v)}" alt="Image de l’élève">` : '<p class="aide" style="margin:0">Pas d’image.</p>';
   return v && v.length ? v.map((l) => `<div class="rep-ligne">${ligneHtml(l)}</div>`).join('') : '<p class="aide" style="margin:0">Pas de réponse.</p>';
 }
 // La réponse écrite sur la feuille, dans la zone de réponse tracée par l'enseignant
@@ -222,6 +276,7 @@ function reponseSurFeuille(pages, z, v, { onClick, classe = '' } = {}) {
 function remplirRep(el, z, v) {
   const t = typeDe(z);
   if (t === 'arbre') { el._cale = () => { el.innerHTML = svgArbre(z.tab, v || {}, el.clientWidth, el.clientHeight, { cale: z.tab.imprime !== false, max: taille12(el) }); }; el._cale(); return; }
+  if (t === 'image') { el._cale = null; const s = v && v.exemple ? v.img : imgSrc(v); el.innerHTML = s ? `<img class="ex-img-feuille" src="${s}" alt="">` : ''; return; }
   if (estCale(z)) { el._cale = () => { el.innerHTML = svgCale(z, v, el.clientWidth, el.clientHeight, taille12(el)); }; el._cale(); return; }
   el._cale = null;
   if (!nonVide(v)) { el.innerHTML = ''; return; }
@@ -296,8 +351,9 @@ const FLECHES = { '': '·', h: '↗', b: '↘', c: '→' };
 async function eleve(r, src = null) {
   const session = r.session, zones = r.questions || [];
   const reponses = {}, valides = new Set();
-  let calculs = [], fini = false, minuterie = null;
+  let calculs = [], fini = false, minuterie = null, surl = [], surligneur = false;
   if (r.copie) {
+    if (Array.isArray(r.copie.surl)) surl = r.copie.surl.filter((s) => s && s.p).slice(0, 300);
     for (const [k, v] of Object.entries(r.copie.reponses || {})) {
       if (Array.isArray(v)) reponses[k] = v.filter((l) => l && typeof l === 'object');
       else if (v && typeof v === 'object') reponses[k] = v;
@@ -316,7 +372,7 @@ async function eleve(r, src = null) {
   const avecRetours = Object.keys(retours).length > 0 || !!(src && src.retourGeneral);
   const repondu = (i) => nonVide(reponses[i]);
   let delai = null;
-  const enregistrer = (immediat) => { clearTimeout(delai); const f = () => (src ? src.sauver({ reponses, calculs, fini, valides: [...valides] }) : api.enregistrerCopie({ reponses, calculs, fini, valides: [...valides] })); if (immediat) return f(); delai = setTimeout(f, 600); return null; };
+  const enregistrer = (immediat) => { clearTimeout(delai); const f = () => (src ? src.sauver({ reponses, calculs, fini, valides: [...valides], surl }) : api.enregistrerCopie({ reponses, calculs, fini, valides: [...valides], surl })); if (immediat) return f(); delai = setTimeout(f, 600); return null; };
   const finChrono = () => (session.dureeMin > 0 ? Date.parse(session.debut) + session.dureeMin * 60000 : null);
   function chrono() {
     clearInterval(minuterie);
@@ -336,6 +392,7 @@ async function eleve(r, src = null) {
   async function feuille() {
     app.innerHTML = `<div class="ev">
       <div class="entete"><h1>📝 ${echapper(session.titre)}</h1><span class="note" id="compte"></span>
+        <span class="ex-surl-btns"><button class="btn petit ${surligneur ? 'actif' : ''}" id="surligneur" title="Surligner l’énoncé : fais glisser la souris sur la feuille. Clique sur un surlignage pour l’effacer.">🖍️ Surligner</button><button class="btn petit" id="surl-effacer" title="Effacer tous mes surlignages" ${surligneur ? '' : 'hidden'}>🧽</button></span>
         <span class="ex-zoom-btns" title="Taille de la feuille"><button class="btn petit" id="zoom-moins" title="Rapetisser la feuille">🔍−</button><button class="btn petit" id="zoom-plus" title="Agrandir la feuille">🔍+</button></span>
         ${finChrono() ? '<span class="chrono" id="chrono"></span>' : ''}${src && src.retour ? '<button class="btn" id="retour-entr">← Entraînement</button>' : ''}<button class="btn ${travail ? 'principal' : ''}" id="terminer">${src && src.libelleTerminer ? src.libelleTerminer : travail ? '📤 Rendre mon travail…' : 'Terminer l’évaluation…'}</button></div>
       ${avecRetours ? `<div class="ex-retour-bandeau">🔁 <b>Ton professeur t’a rendu ton travail</b> : retravaille les questions en <b style="color:#b45309">orange</b> (à compléter) et en <b style="color:#b91c1c">rouge</b> (faux) — clique dessus pour lire sa remarque. Puis rends-le de nouveau.${src.retourGeneral ? `<div class="ex-retour-general">💬 ${echapper(src.retourGeneral).replace(/\n/g, '<br>')}</div>` : ''}</div>` : ''}
@@ -345,13 +402,52 @@ async function eleve(r, src = null) {
     document.getElementById('retour-entr')?.addEventListener('click', async () => { clearInterval(minuterie); await enregistrer(true); src.retour(); });
     document.getElementById('zoom-moins').addEventListener('click', () => changerZoom(-0.2));
     document.getElementById('zoom-plus').addEventListener('click', () => changerZoom(0.2));
+    document.getElementById('surligneur').addEventListener('click', () => modeSurligneur(!surligneur));
+    document.getElementById('surl-effacer').addEventListener('click', () => { if (!surl.length || !confirm('Effacer tous tes surlignages ?')) return; surl = []; dessinerZones(); enregistrer(); });
+    brancherSurligneur();
     brancherOutils(app);
     chrono();
     await dessinerFeuille();
   }
+  function modeSurligneur(actif) {
+    surligneur = actif;
+    document.getElementById('feuille')?.classList.toggle('mode-surl', actif);
+    document.getElementById('surligneur')?.classList.toggle('actif', actif);
+    const ef = document.getElementById('surl-effacer'); if (ef) ef.hidden = !actif;
+  }
+  // surligneur : on fait glisser la souris sur la feuille (un rectangle jaune, sous l'écriture)
+  function brancherSurligneur() {
+    const zf = document.getElementById('feuille'); let g = null;
+    const pos = (e, calque) => { const b = calque.getBoundingClientRect(); return { x: Math.min(1, Math.max(0, (e.clientX - b.left) / b.width)), y: Math.min(1, Math.max(0, (e.clientY - b.top) / b.height)) }; };
+    zf.addEventListener('mousedown', (e) => {
+      if (!surligneur || e.button !== 0 || fini) return;
+      const calque = e.target.closest('.ex-calque'); if (!calque) return;
+      e.preventDefault();
+      const el = document.createElement('div'); el.className = 'ex-surl en-cours'; calque.append(el);
+      g = { calque, el, d: pos(e, calque) };
+    });
+    document.addEventListener('mousemove', (e) => {
+      if (!g) return;
+      const m = pos(e, g.calque);
+      placer(g.el, { x: Math.min(m.x, g.d.x), y: Math.min(m.y, g.d.y), l: Math.abs(m.x - g.d.x), h: Math.abs(m.y - g.d.y) });
+    });
+    document.addEventListener('mouseup', (e) => {
+      if (!g) return;
+      const { calque, el, d } = g; g = null; el.remove();
+      const m = pos(e, calque), l = Math.abs(m.x - d.x); let h = Math.abs(m.y - d.y);
+      if (l < 0.01) return; // simple clic : rien
+      const r4 = (x) => Math.round(x * 10000) / 10000;
+      let y = Math.min(m.y, d.y);
+      if (h < 0.012) { y -= (0.016 - h) / 2; h = 0.016; } // un trait sur une ligne de texte : la hauteur d'une ligne
+      if (surl.length >= 300) { message('Tu as déjà beaucoup de surlignages : efface-en quelques-uns.', true); return; }
+      surl.push({ p: +calque.dataset.page, x: r4(Math.min(m.x, d.x)), y: r4(Math.max(0, y)), l: r4(l), h: r4(h) });
+      dessinerZones(); enregistrer();
+    });
+  }
   async function dessinerFeuille() {
     const zf = document.getElementById('feuille');
     zf.classList.toggle('zoomee', zoomFeuille > 1);
+    zf.classList.toggle('mode-surl', surligneur);
     pages = await afficherPages(pdf, zf, 900, zoomFeuille);
     dessinerZones();
   }
@@ -363,6 +459,7 @@ async function eleve(r, src = null) {
   }
   function dessinerZones() {
     pages.forEach((p) => { p.calque.innerHTML = ''; });
+    dessinerSurl(pages, surl, (k) => { if (!surligneur || fini) return; surl.splice(k, 1); dessinerZones(); enregistrer(); });
     zones.forEach((z, i) => {
       const p = pages[z.page - 1]; if (!p) return;
       const b = document.createElement('button');
@@ -392,7 +489,8 @@ async function eleve(r, src = null) {
             <div class="note-ligne"><input id="saisie-ligne" class="champ-maths" type="text" autocomplete="off" spellcheck="${mode === 'texte'}"><button class="btn principal" id="ajouter" title="Ajouter cette ligne (Entrée)">＋ Ajouter</button></div>
             ${paletteHtml()}
           </div>`;
-    const titreRep = { arbre: '🌳 Complète l’arbre <small>(événements sur les nœuds, probabilités sur les branches)</small>', lignes: '✏️ Ma réponse <small>(une ligne par étape)</small>', valeurs: '🔢 Complète le tableau <small>(Tab ou Entrée : case suivante)</small>', variations: avecVariations(z.tab || {}) ? '📈 Complète le tableau de variations <small>(clique entre deux valeurs pour la flèche)</small>' : '📈 Complète le tableau de signes <small>(clique entre deux valeurs pour le signe)</small>' }[type];
+    fond.collerImage = null; // le collage (Ctrl+V) ne vaut que pour une question « image » ouverte
+    const titreRep = { image: '🖼️ Mon image <small>(capture de l’outil ouvert à côté, image collée ou choisie)</small>', arbre: '🌳 Complète l’arbre <small>(événements sur les nœuds, probabilités sur les branches)</small>', lignes: '✏️ Ma réponse <small>(une ligne par étape)</small>', valeurs: '🔢 Complète le tableau <small>(Tab ou Entrée : case suivante)</small>', variations: avecVariations(z.tab || {}) ? '📈 Complète le tableau de variations <small>(clique entre deux valeurs pour la flèche)</small>' : '📈 Complète le tableau de signes <small>(clique entre deux valeurs pour le signe)</small>' }[type];
     fond.innerHTML = `<div class="ex-loupe" role="dialog" aria-label="Question ${i + 1}">
       <div class="ex-loupe-tete"><b>Question ${i + 1}</b><span class="aide" style="margin:0">${echapper(z.nom)}</span><span class="espace"></span>
         ${outils.map((id) => `<button class="btn petit" data-outil="${id}" title="Ouvrir à côté">${OUTILS[id]}</button>`).join('')}
@@ -427,6 +525,7 @@ async function eleve(r, src = null) {
     if (type === 'lignes') premierChamp = editeurDeLignes();
     else if (type === 'valeurs') premierChamp = editeurValeurs();
     else if (type === 'arbre') premierChamp = editeurArbre();
+    else if (type === 'image') premierChamp = editeurImage();
     else premierChamp = editeurVariations();
 
     // ----- Lignes : texte ou écriture mathématique -----
@@ -524,6 +623,45 @@ async function eleve(r, src = null) {
       });
       return fond.querySelector('[data-arbre]');
     }
+    // ----- Image : capture de l'outil ouvert à côté (GeoGebra, NumWorks…), image collée ou choisie, recadrable -----
+    function editeurImage() {
+      const zt = fond.querySelector('#tableau');
+      const L0 = window.parent && window.parent.labo;
+      const peutCapturer = !!(window.parent && window.parent.capturerOutilACote);
+      const definir = async (url, recadrer = true) => {
+        let u = await compresserImage(url);
+        if (recadrer) { const c = await recadrerImage(u); if (c === null) return; u = await compresserImage(c); }
+        reponses[i] = { img: u }; afficher(); modifie();
+      };
+      const lireFichier = (f) => { if (!f || !/^image\//.test(f.type)) return message('Ce fichier n’est pas une image.', true); const fr = new FileReader(); fr.onload = () => definir(fr.result); fr.readAsDataURL(f); };
+      fond.collerImage = lireFichier;
+      function afficher() {
+        const s = imgSrc(reponses[i]);
+        zt.innerHTML = `<div class="ex-img-zone">${s ? `<img src="${s}" alt="Ton image">` : '<p class="aide" style="margin:0">Pas encore d’image.</p>'}</div>
+          <div class="ex-img-boutons">
+            ${peutCapturer ? '<button type="button" class="btn principal" id="img-capturer" title="Photographie l’outil ouvert à côté (GeoGebra, NumWorks…) : tu gardes ensuite seulement la partie utile">📷 Capturer l’outil à côté</button>' : ''}
+            <button type="button" class="btn" id="img-coller" title="Colle l’image copiée : appuie sur Ctrl+V">📋 Coller (Ctrl+V)</button>
+            <label class="btn" title="Choisir une image sur l’ordinateur">📁 Choisir…<input type="file" id="img-fichier" accept="image/png,image/jpeg,image/webp" hidden></label>
+            ${s ? '<button type="button" class="btn" id="img-recadrer">✂ Recadrer</button><button type="button" class="btn" id="img-suppr">🗑 Enlever</button>' : ''}
+          </div>
+          <p class="aide" style="margin:6px 0 0">${peutCapturer ? (outils.length ? 'Ouvre un outil à côté (' + outils.map((o) => OUTILS[o]).join(', ') + '), trace ta courbe, puis clique sur <b>📷 Capturer</b> et garde seulement la partie utile.' : 'Ouvre un outil à côté, puis clique sur <b>📷 Capturer</b>.') + ' ' : ''}Tu peux aussi coller une image copiée (Ctrl+V).</p>`;
+        zt.querySelector('#img-capturer')?.addEventListener('click', async () => {
+          const r = await window.parent.capturerOutilACote();
+          if (!r || !r.ok) return message((r && r.message) || 'Capture impossible.', true);
+          definir(r.image);
+        });
+        zt.querySelector('#img-coller').addEventListener('click', async () => {
+          const r = L0 && L0.ecran ? await L0.ecran.pressePapier() : null;
+          if (!r || !r.ok) return message((r && r.message) || 'Appuie sur Ctrl+V pour coller ton image (après l’avoir copiée).', !(r && /Ctrl+V/.test(r.message || '')));
+          definir(r.image);
+        });
+        zt.querySelector('#img-fichier').addEventListener('change', (e) => lireFichier(e.target.files[0]));
+        zt.querySelector('#img-recadrer')?.addEventListener('click', () => definir(imgSrc(reponses[i])));
+        zt.querySelector('#img-suppr')?.addEventListener('click', () => { delete reponses[i]; afficher(); modifie(); });
+      }
+      afficher();
+      return zt.querySelector('#img-capturer') || zt.querySelector('#img-coller');
+    }
     // ----- Tableau de variations : valeurs, signes, flèches -----
     function editeurVariations() {
       const t = z.tab, n = t.n;
@@ -607,6 +745,7 @@ async function eleve(r, src = null) {
   function fermerLoupe() {
     document.removeEventListener('keydown', echap);
     const p = document.getElementById('panneau'); if (!p || p.hidden) return;
+    p.collerImage = null;
     p.hidden = true; p.innerHTML = ''; courante = null;
     document.getElementById('travail')?.classList.remove('avec-panneau');
     dessinerZones();
@@ -637,7 +776,17 @@ async function eleve(r, src = null) {
     ecran('✅', 'Copie rendue', 'Ton professeur va la corriger : tu retrouveras ta correction dans « 📝 Mes évaluations ».');
     if (window.parent && window.parent.finEvaluationEleve) window.parent.finEvaluationEleve();
   }
-  window.evaluation = { etat: () => ({ reponses, valides: [...valides], fini, zones }), ouvrirQuestion, confirmation }; // pour les tests
+  // Ctrl+V : une image copiée va dans la question « image » ouverte
+  if (!window.exCollage) { // une seule fois par page (l'élève peut rouvrir l'exercice sans recharger)
+    window.exCollage = true;
+    document.addEventListener('paste', (e) => {
+      const p = document.getElementById('panneau'); if (!p || !p.collerImage) return;
+      const it = [...((e.clipboardData && e.clipboardData.items) || [])].find((x) => x.type.startsWith('image/'));
+      if (!it) return;
+      e.preventDefault(); p.collerImage(it.getAsFile());
+    });
+  }
+  window.evaluation = { etat: () => ({ reponses, valides: [...valides], fini, zones, surl }), ouvrirQuestion, confirmation, surligner: modeSurligneur }; // pour les tests
   const premiere = zones.findIndex((_z, i) => !valides.has(i));
   await feuille();
   if (premiere < 0 && zones.length) confirmation();
@@ -670,6 +819,7 @@ async function correction(c, { sid, retour, octets, entete, bandeau, verdicts = 
   const zoneF = document.getElementById('feuille');
   if (!r.ok) { zoneF.innerHTML = `<p class="aide">${echapper(r.message)}</p>`; return; }
   const pages = await afficherPages(await ouvrirPdf(r.octets), zoneF, 720);
+  dessinerSurl(pages, c.surl);
   zones.forEach((z, i) => {
     const p = pages[z.page - 1]; if (!p) return;
     const n = notes[i] || {};
@@ -729,6 +879,7 @@ async function editerZones(evalId, src = null) {
       <div class="ex-config">Titres des lignes : <input data-lig="x" value="${echapper(ti.x)}" style="width:60px">${tab.signe ? `<input data-lig="s" value="${echapper(ti.s)}" style="width:110px">` : ''}${avecVariations(tab) ? `<input data-lig="f" value="${echapper(ti.f)}" style="width:80px">` : ''}</div>
       <p class="aide" style="margin:4px 0">Valeurs de x déjà écrites sur la feuille (vide : l’élève l’écrit) :</p>
       <div class="ex-config">${Array.from({ length: tab.n }, (_x, k) => `<input data-x="${k}" value="${echapper((tab.x || [])[k] || '')}" style="width:62px" placeholder="x${k + 1}">`).join('')}</div>`; }
+    if (t === 'image') config = '<p class="aide" style="margin:4px 0">L’élève met une <b>image</b> dans la zone de réponse : capture de l’outil ouvert à côté (GeoGebra, NumWorks…, à autoriser dans les outils), image collée ou choisie. Trace une zone de réponse assez grande pour l’image.</p>';
     const etq = `<div class="ex-config ex-etiquettes"><label>🎯 Compétence <select data-etq="competence"><option value="">—</option>${REF.competences.map((c) => `<option value="${c.id}" ${z.competence === c.id ? 'selected' : ''}>${echapper(c.nom)}</option>`).join('')}</select></label>
       <label>🏁 Objectif <select data-etq="objectif"><option value="">—</option>${REF.objectifs.map((o) => `<option value="${o.id}" ${z.objectif === o.id ? 'selected' : ''}>${echapper((o.sequence ? o.sequence + ' · ' : '') + o.nom)}</option>`).join('')}</select></label>
       <label>Points <input type="number" min="0.25" max="50" step="0.25" data-etq="points" value="${z.points || ''}" placeholder="1" style="width:64px"></label></div>
@@ -987,6 +1138,7 @@ async function corriger(sid, eleveId) {
   function zonesFeuille() {
     const reps = (r.copie && r.copie.reponses) || {};
     pages.forEach((p) => { p.calque.innerHTML = ''; });
+    dessinerSurl(pages, r.copie && r.copie.surl);
     zones.forEach((z, i) => {
       const p = pages[z.page - 1]; if (!p) return;
       const v = (notes.questions[i] || {}).v;
@@ -1054,7 +1206,7 @@ async function corriger(sid, eleveId) {
 // Les réponses sont gardées dans la copie du travail : valeurs[<id de la question>] = réponse (JSON).
 // =====================================================================================
 const L = () => window.parent && window.parent.labo;
-const resumeRep = (v) => (!v ? '' : Array.isArray(v) ? v.map((l) => l.t).join(' / ') : (v.n || v.p) ? Object.keys({ ...(v.n || {}), ...(v.p || {}) }).sort().map((c) => `${(v.n || {})[c] || '?'} (${(v.p || {})[c] || '?'})`).join(' ; ') : v.cases ? Object.values(v.cases).filter(Boolean).join(' ; ')
+const resumeRep = (v) => (!v ? '' : v.img ? '🖼️ image' : Array.isArray(v) ? v.map((l) => l.t).join(' / ') : (v.n || v.p) ? Object.keys({ ...(v.n || {}), ...(v.p || {}) }).sort().map((c) => `${(v.n || {})[c] || '?'} (${(v.p || {})[c] || '?'})`).join(' ; ') : v.cases ? Object.values(v.cases).filter(Boolean).join(' ; ')
   : ['x', 'z', 's', 'f'].map((k) => (v[k] || []).filter(Boolean).join(' ')).filter(Boolean).join(' | ') + ((v.fl || []).some(Boolean) ? ' ' + v.fl.map((x) => FLECHES[x] || '·').join(' ') : ''));
 const lireValeur = (valeurs, k) => { try { return valeurs[k] === undefined ? undefined : JSON.parse(valeurs[k]); } catch { return undefined; } };
 const reponsesDuTravail = (zones, valeurs) => { const r = {}; zones.forEach((z, i) => { const v = lireValeur(valeurs, z.id); if (v !== undefined && v !== null) r[i] = v; }); return r; };
@@ -1079,13 +1231,13 @@ async function travail(mode, cl, tr) {
   const ret = r.retour || null, notesRet = {};
   if (ret) zones.forEach((z, i) => { if (ret.questions && ret.questions[z.id]) notesRet[i] = ret.questions[z.id]; });
   const valide = ret && ret.statut === 'valide';
-  const relire = (rendu) => correction({ titre: r.travail.nom, zones, reponses: reponsesDuTravail(zones, valeurs), notes: valide || (ret && r.copie && r.copie.rendu && Date.parse(ret.date) > Date.parse(r.copie.rendu)) ? notesRet : {}, general: valide ? ret.general : '' }, {
+  const relire = (rendu) => correction({ titre: r.travail.nom, zones, reponses: reponsesDuTravail(zones, valeurs), surl: lireValeur(valeurs, 'surl') || [], notes: valide || (ret && r.copie && r.copie.rendu && Date.parse(ret.date) > Date.parse(r.copie.rendu)) ? notesRet : {}, general: valide ? ret.general : '' }, {
     octets: r.octets, entete: `📄 ${r.travail.nom}`, verdicts: VERDICTS_TRAVAIL,
     bandeau: r.lectureSeule ? `🗄 Classe clôturée (année ${echapper(r.annee || '')}) : ta copie se lit, mais ne se modifie plus.`
       : valide ? `✅ <b>Travail validé par ton professeur</b> ${dateHeure(ret.date)}.` : `✅ <b>Travail rendu</b> ${dateHeure(rendu)}. Tu ne peux plus le modifier (sauf si ton professeur te le rend pour le retravailler).`,
   });
   if ((r.copie && r.copie.rendu) || r.lectureSeule) return relire(r.copie && r.copie.rendu);
-  const sauver = async ({ reponses, valides, fini }) => {
+  const sauver = async ({ reponses, valides, fini, surl }) => {
     const t = new Date().toISOString();
     zones.forEach((z, i) => {
       const nouveau = nonVide(reponses[i]) ? JSON.stringify(reponses[i]) : undefined;
@@ -1094,6 +1246,7 @@ async function travail(mode, cl, tr) {
       if (nouveau === undefined) delete valeurs[z.id]; else valeurs[z.id] = nouveau;
     });
     valeurs.valides = JSON.stringify(valides);
+    if (surl && surl.length) valeurs.surl = JSON.stringify(surl); else delete valeurs.surl;
     const rendu = fini ? t : null;
     const res = await L().classes.enregistrerTravail(cl, tr, { valeurs, historique, rendu });
     if (!res.ok) message(res.message, true);
@@ -1103,7 +1256,7 @@ async function travail(mode, cl, tr) {
   const valides = lireValeur(valeurs, 'valides') || [];
   const aRetravailler = ret && ret.statut === 'a-retravailler';
   return eleve({ session: { titre: r.travail.nom, dureeMin: 0, calculatrice: true, outils: [] }, questions: zones,
-    copie: { reponses: reponsesDuTravail(zones, valeurs), valides: aRetravailler ? valides.filter((i) => !notesRet[i] || notesRet[i].v === 'juste') : valides, fini: false } },
+    copie: { reponses: reponsesDuTravail(zones, valeurs), surl: lireValeur(valeurs, 'surl') || [], valides: aRetravailler ? valides.filter((i) => !notesRet[i] || notesRet[i].v === 'juste') : valides, fini: false } },
   { octets: r.octets, sauver, retours: aRetravailler ? notesRet : {}, retourGeneral: aRetravailler ? ret.general : '', apresRendu: () => { message('📤 Travail rendu : ton professeur le voit.'); relire(r.copie && r.copie.rendu); } });
 }
 
@@ -1141,6 +1294,7 @@ async function travailSuivi(cl, tr) {
     const rem = remarquesDe(x);
     document.getElementById('rendre-retravail').disabled = document.getElementById('valider-travail').disabled = !copie;
     pages.forEach((p) => { p.calque.innerHTML = ''; });
+    dessinerSurl(pages, lireValeur(valeurs, 'surl'));
     zones.forEach((z, i) => {
       const p = pages[z.page - 1]; if (!p) return;
       const v = (rem.questions[z.id] || {}).v;
@@ -1220,9 +1374,9 @@ async function module(id, retour) { // élève : chercher l'exercice, puis déco
   if (!r.ok) return ecran('⚠️', 'Entraînement', echapper(r.message));
   const m = r.module, zones = m.zones || [];
   let copie = r.copie || { reponses: {}, valides: [], fini: false, auto: {} };
-  const sauver = async (etat) => { const x = await api.entrModuleSauver(id, { reponses: etat.reponses, valides: etat.valides, fini: etat.fini, auto: copie.auto || {} }); if (x.ok) copie = x.copie; return x; };
+  const sauver = async (etat) => { const x = await api.entrModuleSauver(id, { reponses: etat.reponses, valides: etat.valides, fini: etat.fini, surl: etat.surl, auto: copie.auto || {} }); if (x.ok) copie = x.copie; return x; };
   if (copie.fini) return correctionModule(m, r.octets, copie, retour);
-  return eleve({ session: { titre: m.titre, dureeMin: 0, calculatrice: true, outils: [] }, questions: zones, copie: { reponses: copie.reponses || {}, valides: copie.valides || [], fini: false } },
+  return eleve({ session: { titre: m.titre, dureeMin: 0, calculatrice: true, outils: [] }, questions: zones, copie: { reponses: copie.reponses || {}, valides: copie.valides || [], surl: copie.surl || [], fini: false } },
     { octets: r.octets, sauver, retour, libelleTerminer: '✅ Voir la correction…', libelleConfirmer: '✅ J’ai fini : voir la correction', apresRendu: () => correctionModule(m, r.octets, copie, retour) });
 }
 async function correctionModule(m, octets, copie, retour) {
@@ -1239,7 +1393,7 @@ async function correctionModule(m, octets, copie, retour) {
     </div></div></div>`;
   const zoneF = document.getElementById('feuille');
   let pages = await afficherPages(await ouvrirPdf(octets), zoneF, 720);
-  const dessinerFeuille = () => zones.forEach((z, i) => {
+  const dessinerFeuille = () => (dessinerSurl(pages, copie.surl), zones).forEach((z, i) => {
     const p = pages[z.page - 1]; if (!p) return;
     const b = document.createElement('button'); b.className = `ex-zone corr ${auto[i] || ''}`; placer(b, z); b.innerHTML = `<span class="ex-num">${i + 1}</span>`;
     b.addEventListener('click', () => document.getElementById('q' + i)?.scrollIntoView({ behavior: 'smooth', block: 'center' }));
@@ -1247,7 +1401,7 @@ async function correctionModule(m, octets, copie, retour) {
   });
   dessinerFeuille();
   const enregistrerAuto = async () => {
-    await api.entrModuleSauver(m.id, { reponses: reps, valides: copie.valides || [], fini: true, auto });
+    await api.entrModuleSauver(m.id, { reponses: reps, valides: copie.valides || [], surl: copie.surl || [], fini: true, auto });
     await api.entrProgres({ module: { id: m.id, titre: m.titre, auto, total: zones.length } });
   };
   enregistrerAuto();
