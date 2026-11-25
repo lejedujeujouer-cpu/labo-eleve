@@ -16,7 +16,7 @@ const libres = args.filter((a, i) => i !== iNotes && i !== iNotes + 1);
 function dossierPartage() {
   if (libres[0]) return libres[0];
   for (const appli of ['Labo Prof', 'Labo Élève']) {
-    try { const c = JSON.parse(fs.readFileSync(path.join(process.env.APPDATA, appli, 'config.json'), 'utf8')); if (c.dossierMaj) return c.dossierMaj; } catch { /* suivant */ }
+    try { const c = JSON.parse(fs.readFileSync(path.join(process.env.APPDATA, appli, 'config.json'), 'utf8')); if (c.nuage && c.nuage.lien) { const j = /\/s\/([A-Za-z0-9]+)/.exec(c.nuage.lien); if (j) return path.join(process.env.APPDATA, appli, 'nuage', j[1]); } if (c.dossierMaj) return c.dossierMaj; } catch { /* suivant */ }
   }
   return null;
 }

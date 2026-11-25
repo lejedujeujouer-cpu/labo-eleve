@@ -583,9 +583,82 @@ $('#btn-oublier-maj').addEventListener('click', async () => { afficherConfig(awa
 $('#btn-verifier-maj').addEventListener('click', async () => apresInstallation(await api.verifierMaj()));
 $('#btn-ouvrir-dossier').addEventListener('click', () => api.ouvrirDossierOutils());
 
+// ---------- Dossier partagé sur Nuage : coller le lien de partage ----------
+const heureCourte = (iso) => (iso ? new Date(iso).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : '');
+function texteNuage(e) {
+  if (!e || !e.actif) return '';
+  if (e.erreur) return `${e.horsLigne ? '📴 Hors ligne' : '⚠️ ' + e.erreur} — tes changements sont gardés sur ce PC et partiront au retour du réseau.`;
+  const att = e.attente ? ` · ⏳ ${e.attente} fichier(s) en attente de la clé de ton professeur (il doit ouvrir Labo Prof une fois)` : '';
+  return (e.derniere ? `☁ Synchronisé avec Nuage à ${heureCourte(e.derniere)} · 🔒 copies et notes chiffrées` : '☁ Synchronisation en cours…') + att;
+}
+function majEtatNuage(e) {
+  const el = document.getElementById('nuage-etat'); if (!el) return;
+  el.hidden = !(e && e.actif); el.textContent = texteNuage(e); el.classList.toggle('erreur', !!(e && (e.erreur || e.attente)));
+  const c = document.getElementById('nuage-cle'); if (c) c.hidden = !(e && e.actif && e.compteProf);
+}
+if (api.nuage) api.nuage.surEtat(majEtatNuage);
+window.choisirLienNuage = function () {
+  return new Promise((fin) => {
+    const d = document.createElement('dialog'); d.className = 'dialogue dlg-nuage';
+    d.innerHTML = `<form method="dialog" class="dialogue-contenu">
+      <h2>☁ Dossier partagé sur Nuage</h2>
+      <p>Colle le <b>lien de partage</b> du dossier (Nuage d’apps.education.fr : <i>Partager → Lien de partage</i>, avec les permissions <b>Lire, Créer, Modifier</b>). Les élèves n’ont pas besoin de compte : le même lien suffit sur leur PC.</p>
+      <label>Lien<input id="nuage-lien" type="url" placeholder="https://nuage06.apps.education.fr/index.php/s/…" autocomplete="off" spellcheck="false" required></label>
+      <label>Mot de passe du lien <small>(seulement si le lien en a un)</small><input id="nuage-mdp" type="password" autocomplete="off"></label>
+      <label class="case" id="nuage-copier-l" hidden><input type="checkbox" id="nuage-copier" checked> Copier le contenu de mon dossier partagé actuel dans Nuage (classes, documents…)</label>
+      <p class="aide" id="nuage-msg"></p>
+      <div class="rangee"><button type="button" class="secondaire" id="nuage-annuler">Annuler</button><button type="button" class="principal" id="nuage-ok">Utiliser ce lien</button></div></form>`;
+    document.body.append(d);
+    api.lireConfig().then((c) => { if (c && c.dossierMaj && !c.nuage) d.querySelector('#nuage-copier-l').hidden = false; if (c && c.nuage) d.querySelector('#nuage-lien').value = c.nuage.lien; });
+    const fermer = (v) => { d.close(); d.remove(); fin(v); };
+    d.querySelector('#nuage-annuler').addEventListener('click', () => fermer(null));
+    d.querySelector('#nuage-ok').addEventListener('click', async () => {
+      const msg = d.querySelector('#nuage-msg'), ok = d.querySelector('#nuage-ok');
+      const lien = d.querySelector('#nuage-lien').value.trim(); if (!lien) return;
+      ok.disabled = true; msg.textContent = '⏳ Vérification du lien et première synchronisation…'; msg.classList.remove('erreur');
+      const copier = !d.querySelector('#nuage-copier-l').hidden && d.querySelector('#nuage-copier').checked;
+      const r = await api.nuage.definir(lien, d.querySelector('#nuage-mdp').value, copier);
+      ok.disabled = false;
+      if (!r.ok) { msg.textContent = '⚠️ ' + r.message; msg.classList.add('erreur'); return; }
+      toast('☁ Nuage relié', r.erreur ? 'Lien enregistré ; la synchronisation reprendra au retour du réseau.' : `Dossier synchronisé (${r.recus} reçu(s), ${r.envoyes} envoyé(s)).`, 'succes');
+      fermer(r);
+    });
+    d.showModal(); d.querySelector('#nuage-lien').focus();
+  });
+};
+$('#btn-nuage').addEventListener('click', async () => { if (await window.choisirLienNuage()) { afficherConfig(await api.lireConfig()); } });
+// Clé de l'enseignant : sans elle, impossible de relire les copies chiffrées (nouveau PC, réinstallation)
+function demanderMotDePasse(titre, texte) {
+  return new Promise((fin) => {
+    const d = document.createElement('dialog'); d.className = 'dialogue dlg-nuage';
+    d.innerHTML = `<form method="dialog" class="dialogue-contenu"><h2>${titre}</h2><p>${texte}</p>
+      <label>Mot de passe<input id="cle-mdp" type="password" autocomplete="new-password"></label>
+      <div class="rangee"><button type="button" class="secondaire" id="cle-annuler">Annuler</button><button type="button" class="principal" id="cle-ok">Continuer</button></div></form>`;
+    document.body.append(d);
+    const fermer = (v) => { d.close(); d.remove(); fin(v); };
+    d.querySelector('#cle-annuler').addEventListener('click', () => fermer(null));
+    d.querySelector('#cle-ok').addEventListener('click', () => fermer(d.querySelector('#cle-mdp').value));
+    d.showModal(); d.querySelector('#cle-mdp').focus();
+  });
+}
+document.getElementById('btn-cle-sauver')?.addEventListener('click', async () => {
+  const mdp = await demanderMotDePasse('🔑 Sauvegarder ma clé Nuage', 'Choisis un mot de passe (8 caractères ou plus) pour protéger le fichier de sauvegarde. Garde ce fichier sur une clé USB : il te permettra de relire les copies chiffrées sur un nouvel ordinateur.');
+  if (mdp === null) return;
+  const r = await api.nuage.exporterCle(mdp);
+  if (r.ok) toast('🔑 Clé sauvegardée', r.fichier, 'succes'); else if (!r.annule) toast('Sauvegarde impossible', r.message, 'erreur');
+});
+document.getElementById('btn-cle-restaurer')?.addEventListener('click', async () => {
+  const mdp = await demanderMotDePasse('🔑 Restaurer ma clé Nuage', 'Le mot de passe choisi au moment de la sauvegarde.');
+  if (mdp === null) return;
+  const r = await api.nuage.importerCle(mdp);
+  if (r.ok) { toast('🔑 Clé restaurée', 'Les copies chiffrées vont être relues à la prochaine synchronisation.', 'succes'); api.nuage.synchroniser(); }
+  else if (!r.annule) toast('Restauration impossible', r.message, 'erreur');
+});
+
 function afficherConfig(config) {
   const d = config?.dossierMaj;
-  $('#chemin-maj').textContent = d || 'Aucun dossier choisi';
+  $('#chemin-maj').textContent = config?.nuage ? '☁ Nuage : ' + config.nuage.lien : (d || 'Aucun dossier choisi');
+  if (api.nuage) api.nuage.etat().then(majEtatNuage);
   $('#btn-verifier-maj').disabled = !d;
   $('#btn-oublier-maj').hidden = !d;
 }

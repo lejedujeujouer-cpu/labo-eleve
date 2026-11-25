@@ -230,7 +230,10 @@
         <h3>Dossier partagé de l'établissement</h3>
         <p>Le dossier commun du lycée (lecteur réseau, ENT synchronisé…) où le professeur dépose les nouveaux outils, ses classes et ses documents. Indique-le ici : l'application y cherche les nouveautés à chaque démarrage, et les élèves y trouvent leur classe.</p>
         <div class="chemin" id="chemin-maj">Aucun dossier choisi</div>
+        <div class="nuage-etat" id="nuage-etat" hidden></div>
+        <div class="rangee" id="nuage-cle" hidden><button type="button" id="btn-cle-sauver" class="secondaire" title="Indispensable : sans ta clé, impossible de relire les copies chiffrées sur un autre ordinateur">🔑 Sauvegarder ma clé</button><button type="button" id="btn-cle-restaurer" class="lien">Restaurer une clé…</button></div>
         <div class="rangee">
+          <button type="button" id="btn-nuage" class="secondaire" title="Dossier partagé sur Nuage (apps.education.fr) : il suffit du lien de partage, sans compte pour les élèves">☁ Lien Nuage…</button>
           <button type="button" id="btn-choisir-maj" class="secondaire">Choisir le dossier</button>
           <button type="button" id="btn-verifier-maj" class="principal">Vérifier maintenant</button>
           <button type="button" id="btn-oublier-maj" class="lien">Retirer</button>

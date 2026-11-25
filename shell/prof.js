@@ -145,10 +145,12 @@
       <h2>Dossier partagé de l'établissement</h2>
       <p>Les classes, les listes d'élèves et tes documents sont enregistrés dans un dossier commun à tous les PC (lecteur réseau du lycée, dossier ENT synchronisé…). Choisis-le sur ton ordinateur, puis choisis le même dossier sur les PC des élèves.</p>
       ${e.dossier ? `<p class="aide-code erreur">Le dossier choisi est introuvable : ${echapper(e.dossier)}</p>` : ''}
-      <div class="rangee"><button class="principal" id="prof-choisir-dossier">Choisir le dossier partagé</button></div>
+      <div class="rangee"><button class="principal" id="prof-choisir-dossier">Choisir le dossier partagé</button><button class="secondaire" id="prof-nuage">☁ Utiliser un lien Nuage…</button></div>
+      <p class="note-prof">☁ <b>Nuage</b> (apps.education.fr) : crée un dossier dans ton Nuage, partage-le par <b>lien</b> (Lire, Créer, Modifier — sans « Supprimer ») et colle ce lien ici puis sur les PC des élèves. Ça marche au lycée, à la maison et en 4G, sans compte pour les élèves.</p>
       <p class="note-prof">Conseil : donne aux élèves un accès en <b>lecture seule</b> à ce dossier.</p>
     </div>`;
     $('#prof-choisir-dossier').addEventListener('click', async () => { await api.choisirDossierMaj(); afficher(); });
+    $('#prof-nuage').addEventListener('click', async () => { if (window.choisirLienNuage && await window.choisirLienNuage()) afficher(); });
   }
 
   // ---------- 2. Mot de passe ----------

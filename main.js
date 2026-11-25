@@ -2,7 +2,7 @@
 // - sert l'interface et les outils via le protocole interne app://local/
 // - gère l'installation / mise à jour / suppression des outils
 
-const { app, BrowserWindow, protocol, ipcMain, dialog, shell, Menu, net, webFrameMain, session, globalShortcut, clipboard } = require('electron');
+const { app, BrowserWindow, protocol, ipcMain, dialog, shell, Menu, net, webFrameMain, session, globalShortcut, clipboard, safeStorage } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
@@ -11,6 +11,8 @@ const crypto = require('crypto');
 const AdmZip = require('adm-zip');
 const { creerModeClasse } = require('./mode-classe');
 const { creerEspaceClasses } = require('./espace-classes');
+const { creerNuage, analyserLien } = require('./nuage');
+const { creerTrousseau } = require('./chiffrement');
 const { creerSuivi } = require('./suivi');
 const { creerOffice } = require('./office');
 const { creerEvaluations } = require('./evaluations');
@@ -112,12 +114,33 @@ const ouvrirDialogue = (options) => classe.pendantDialogue(() => dialog.showOpen
 
 // ---------- Configuration ----------
 
-function lireConfig() {
+function lireConfigBrute() {
   try {
     return JSON.parse(fs.readFileSync(fichierConfig(), 'utf8'));
   } catch {
     return { dossierMaj: null };
   }
+}
+// Dossier partagé sur Nuage (lien de partage) : toute l'application travaille dans la copie locale synchronisée.
+let nuage = null;
+let dernierCompteProf = null; // enseignant connecté sur ce PC (pour sa clé)
+// Clés de chiffrement de ce PC (enseignant ou élève) : la clé privée est protégée par Windows (safeStorage)
+let trousseau = null;
+const obtenirTrousseau = () => trousseau || (trousseau = creerTrousseau({
+  dossierDonnees: () => app.getPath('userData'), nomFichierSur,
+  protection: safeStorage.isEncryptionAvailable() ? { chiffrer: (t) => safeStorage.encryptString(t).toString('base64'), dechiffrer: (t) => safeStorage.decryptString(Buffer.from(t, 'base64')) } : null,
+}));
+const obtenirNuage = () => nuage || (nuage = creerNuage({ dossierDonnees: () => app.getPath('userData'), journal: (m) => console.log(m), trousseau: obtenirTrousseau() }));
+// publie la clé publique de l'enseignant ou de l'élève dans le dossier partagé (si Nuage est utilisé)
+function publierCle(id) {
+  try { const m = miroirNuage(lireConfigBrute()); if (m) { obtenirTrousseau().publier(m, id); if (nuage) nuage.synchroniser(); } } catch (e) { console.log('clé : ' + e.message); }
+}
+const miroirNuage = (c) => { const a = c && c.nuage && analyserLien(c.nuage.lien); return a ? path.join(app.getPath('userData'), 'nuage', a.jeton) : null; };
+function lireConfig() {
+  const c = lireConfigBrute();
+  const m = miroirNuage(c);
+  if (m) { try { fs.mkdirSync(m, { recursive: true }); } catch { /* disque */ } return { ...c, dossierMaj: m, nuage: { lien: c.nuage.lien } }; } // le mot de passe ne sort pas
+  return c;
 }
 
 function ecrireConfig(config) {
@@ -1147,16 +1170,55 @@ function enregistrerIPC() {
       properties: ['openDirectory'],
     });
     if (choix.canceled) return lireConfig();
-    const config = { ...lireConfig(), dossierMaj: choix.filePaths[0] };
-    ecrireConfig(config);
-    return config;
+    ecrireConfig({ ...lireConfigBrute(), dossierMaj: choix.filePaths[0], nuage: null }); // un dossier ordinaire remplace le lien Nuage
+    obtenirNuage().arreter();
+    return lireConfig();
   });
 
   ipcMain.handle('maj:oublier-dossier', () => {
-    const config = { ...lireConfig(), dossierMaj: null };
-    ecrireConfig(config);
-    return config;
+    ecrireConfig({ ...lireConfigBrute(), dossierMaj: null, nuage: null });
+    obtenirNuage().arreter();
+    return lireConfig();
   });
+
+  // ---------- Dossier partagé sur Nuage (apps.education.fr) par lien ----------
+  ipcMain.handle('nuage:tester', async (_e, lien, mdp) => obtenirNuage().tester({ lien, mdp }));
+  ipcMain.handle('nuage:definir', async (_e, lien, mdp, copier) => {
+    const n = obtenirNuage();
+    const t = await n.tester({ lien, mdp });
+    if (!t.ok) return t;
+    const avant = lireConfigBrute();
+    const ancien = !miroirNuage(avant) && avant.dossierMaj && fs.existsSync(avant.dossierMaj) ? avant.dossierMaj : null;
+    ecrireConfig({ ...avant, dossierMaj: avant.dossierMaj || null, nuage: { lien: t.lien, mdp: String(mdp || '').slice(0, 200) } });
+    const m = miroirNuage(lireConfigBrute());
+    let copies = 0;
+    if (copier && ancien && m) { // le contenu du dossier actuel part sur Nuage (sans écraser ce qui y est déjà)
+      fs.mkdirSync(m, { recursive: true });
+      fs.cpSync(ancien, m, { recursive: true, force: false, errorOnExist: false, filter: (s) => !/(^|[\\/])(Thumbs\.db|desktop\.ini|~\$[^\\/]*)$/i.test(s) });
+      copies = 1;
+    }
+    n.demarrer(lireConfigBrute().nuage);
+    const r = await n.synchroniser();
+    return { ...r, ok: true, copie: !!copies, vide: t.vide };
+  });
+  ipcMain.handle('nuage:etat', () => ({ ...obtenirNuage().infos(), compteProf: dernierCompteProf, cleProf: !!(dernierCompteProf && obtenirTrousseau().cle('prof:' + dernierCompteProf)) }));
+  // Sauvegarde / restauration de la clé de l'enseignant (indispensable pour relire les copies sur un nouveau PC)
+  ipcMain.handle('nuage:exporter-cle', async (_e, mdp) => {
+    if (!dernierCompteProf) return { ok: false, message: 'Ouvre d’abord ton espace professeur (avec ton mot de passe).' };
+    if (String(mdp || '').length < 8) return { ok: false, message: 'Choisis un mot de passe d’au moins 8 caractères pour protéger la sauvegarde.' };
+    const id = 'prof:' + dernierCompteProf; obtenirTrousseau().assurer(id);
+    const choix = await classe.pendantDialogue(() => dialog.showSaveDialog(fenetre, { title: 'Sauvegarder ma clé Nuage', defaultPath: 'cle-labo-nuage.labocle', filters: [{ name: 'Clé Labo', extensions: ['labocle'] }] }));
+    if (choix.canceled || !choix.filePath) return { ok: false, annule: true };
+    fs.writeFileSync(choix.filePath, obtenirTrousseau().exporter(id, mdp));
+    return { ok: true, fichier: choix.filePath };
+  });
+  ipcMain.handle('nuage:importer-cle', async (_e, mdp) => {
+    const choix = await ouvrirDialogue({ title: 'Restaurer ma clé Nuage', properties: ['openFile'], filters: [{ name: 'Clé Labo', extensions: ['labocle'] }] });
+    if (choix.canceled || !choix.filePaths[0]) return { ok: false, annule: true };
+    try { const id = obtenirTrousseau().importer(fs.readFileSync(choix.filePaths[0], 'utf8'), mdp); publierCle(id); return { ok: true, id }; }
+    catch (e) { return { ok: false, message: e.message }; }
+  });
+  ipcMain.handle('nuage:synchroniser', () => obtenirNuage().synchroniser());
 
   ipcMain.handle('maj:verifier', () => verifierDossierMaj());
 
@@ -1513,8 +1575,8 @@ if (!app.requestSingleInstanceLock()) {
       ipcMain, dialog, obtenirFenetre: () => fenetre, lireConfig, edition: EDITION, pendantDialogue: classe.pendantDialogue,
       ouvrirChemin: (p) => shell.openPath(p),
       dossierDocuments, cheminLibre, nomFichierSur, urlPadValide, dossierDonnees: () => app.getPath('userData'),
-      surIdentification: (eleve) => { suivi.definirEleve(eleve); majFocus(); },
-      surDeverrouillage: (mdp, compteId) => suivi.demarrer(mdp, compteId),
+      surIdentification: (eleve) => { suivi.definirEleve(eleve); majFocus(); if (eleve && eleve.classeId && eleve.eleveId) publierCle(`eleve:${eleve.classeId}:${eleve.eleveId}`); },
+      surDeverrouillage: (mdp, compteId) => { suivi.demarrer(mdp, compteId); if (compteId) { dernierCompteProf = compteId; publierCle('prof:' + compteId); } },
       surLiberation: (mdp) => suivi.enregistrerLiberation(mdp),
       surExamenLeve: () => { suivi.ajouterEvenement({ type: 'examen-leve' }); majFocus(); },
       surExamenLocal: () => { majFocus(); suivi.ajouterEvenement({ type: 'examen-local' }); },
@@ -1524,6 +1586,8 @@ if (!app.requestSingleInstanceLock()) {
     creerEvaluations({ app, ipcMain, espace, lireConfig, edition: EDITION, dossierDonnees: () => app.getPath('userData'),
       dialogues: { ouvrir: ouvrirDialogue, enregistrer: (o) => classe.pendantDialogue(() => dialog.showSaveDialog(fenetre, o)) } });
     enregistrerIPC();
+    obtenirNuage().surChangement((e) => { if (fenetre && !fenetre.isDestroyed()) fenetre.webContents.send('nuage:etat', e); });
+    if (miroirNuage(lireConfigBrute())) obtenirNuage().demarrer(lireConfigBrute().nuage);
     classe.enregistrerIPC();
     espace.enregistrerIPC();
     suivi.enregistrerIPC();
@@ -1533,6 +1597,13 @@ if (!app.requestSingleInstanceLock()) {
     }
   });
   app.on('will-quit', () => { try { globalShortcut.unregisterAll(); } catch { /* déjà fait */ } });
+  // Avant de quitter : un dernier envoi vers Nuage (4 s au plus), pour ne pas garder une copie seulement sur ce PC
+  let nuageFini = false;
+  app.on('before-quit', (e) => {
+    if (nuageFini || !nuage || !nuage.infos().actif) return;
+    e.preventDefault(); nuageFini = true;
+    Promise.race([nuage.synchroniser(), new Promise((r) => setTimeout(r, 4000))]).finally(() => { nuage.arreter(); app.quit(); });
+  });
 
   app.on('window-all-closed', () => app.quit());
 

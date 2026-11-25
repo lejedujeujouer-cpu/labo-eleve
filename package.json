@@ -43,7 +43,7 @@
       "shell/**",
       "commun/**",
       "outils/**",
-      "classeur-xlsx.js", "liste-eleves.js",
+      "classeur-xlsx.js", "liste-eleves.js", "nuage.js", "chiffrement.js",
       "evaluations.js",
       "signature.js",
       "signature-publique.pem",
