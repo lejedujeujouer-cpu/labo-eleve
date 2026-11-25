@@ -5,6 +5,8 @@ Boîte à outils interactifs de mathématiques et de physique-chimie pour le lyc
 - **Labo Élève** : outils de maths et de physique-chimie, évaluations, travail à rendre, entraînement par chapitre.
 - **Labo Prof** : gestion des classes, évaluations (QCM et exercices sur PDF), correction, notes et compétences, suivi des élèves.
 
+**Auteur :** Guilhem TAMURA, enseignant de mathématiques et physique-chimie en lycée professionnel.
+
 Les données des élèves restent sur leurs ordinateurs et dans le dossier partagé de l'établissement : rien n'est envoyé sur Internet.
 
 ## Lancer depuis le code
