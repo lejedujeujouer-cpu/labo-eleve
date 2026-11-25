@@ -61,6 +61,7 @@
     ],
     "win": {
       "signAndEditExecutable": false,
+      "signtoolOptions": { "sign": "scripts/signer.js", "signingHashAlgorithms": ["sha256"], "publisherName": ["Open Source Developer Guilhem TAMURA"] },
       "target": [
         "nsis",
         "portable"

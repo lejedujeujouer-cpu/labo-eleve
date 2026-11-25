@@ -16,9 +16,10 @@ exports.default = async function (contexte) {
     '--set-version-string', 'ProductName', info.productName,
     '--set-version-string', 'InternalName', info.productName,
     '--set-version-string', 'OriginalFilename', `${info.productFilename}.exe`,
-    '--set-version-string', 'CompanyName', 'Enseignant',
+    '--set-version-string', 'CompanyName', 'Guilhem TAMURA',
     '--set-file-version', info.version,
     '--set-product-version', info.version,
   ]);
   console.log(`  • icône et nom posés sur ${path.basename(exe)}`);
+  require('./signer.js').signerFichier(exe, info.productName); // signature Certum (si le certificat est présent)
 };
