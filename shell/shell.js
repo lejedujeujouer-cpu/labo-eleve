@@ -595,8 +595,41 @@ function majEtatNuage(e) {
   const el = document.getElementById('nuage-etat'); if (!el) return;
   el.hidden = !(e && e.actif); el.textContent = texteNuage(e); el.classList.toggle('erreur', !!(e && (e.erreur || e.attente)));
   const c = document.getElementById('nuage-cle'); if (c) c.hidden = !(e && e.actif && e.compteProf);
+  // autres liens (élève : un par professeur)
+  const l = document.getElementById('nuage-autres');
+  if (l) {
+    const s = (e && e.supp) || [];
+    l.hidden = !s.length;
+    l.innerHTML = s.length ? '<b>Autres liens Nuage :</b>' + s.map((x) => `<div class="nuage-lien"><span>${x.erreur ? '⚠️' : '☁'} ${x.lien.replace(/^https:\/\//, '')}</span><button type="button" class="lien" data-retirer-lien="${x.lien}">Retirer</button></div>`).join('') : '';
+  }
 }
 if (api.nuage) api.nuage.surEtat(majEtatNuage);
+// Élève : lien Nuage d'un autre professeur (s'ajoute aux liens déjà enregistrés)
+window.ajouterLienNuage = function () {
+  return new Promise((fin) => {
+    const d = document.createElement('dialog'); d.className = 'dialogue dlg-nuage';
+    d.innerHTML = `<form method="dialog" class="dialogue-contenu">
+      <h2>☁ Lien Nuage de ton professeur</h2>
+      <p>Colle le lien que ton professeur t’a donné (il commence par <b>https://nuage</b>…). Ses classes apparaîtront dans la liste.</p>
+      <label>Lien<input id="ajout-lien" type="url" placeholder="https://nuage06.apps.education.fr/index.php/s/…" autocomplete="off" spellcheck="false"></label>
+      <label>Mot de passe du lien <small>(si ton professeur t’en a donné un)</small><input id="ajout-mdp" type="password" autocomplete="off"></label>
+      <p class="aide" id="ajout-msg"></p>
+      <div class="rangee"><button type="button" class="secondaire" id="ajout-annuler">Annuler</button><button type="button" class="principal" id="ajout-ok">Ajouter</button></div></form>`;
+    document.body.append(d);
+    const fermer = (v) => { d.close(); d.remove(); fin(v); };
+    d.querySelector('#ajout-annuler').addEventListener('click', () => fermer(null));
+    d.querySelector('#ajout-ok').addEventListener('click', async () => {
+      const msg = d.querySelector('#ajout-msg'), ok = d.querySelector('#ajout-ok'), lien = d.querySelector('#ajout-lien').value.trim(); if (!lien) return;
+      ok.disabled = true; msg.classList.remove('erreur'); msg.textContent = '⏳ Vérification du lien et téléchargement des classes…';
+      const r = await api.nuage.ajouterLien(lien, d.querySelector('#ajout-mdp').value);
+      ok.disabled = false;
+      if (!r.ok) { msg.textContent = '⚠️ ' + r.message; msg.classList.add('erreur'); return; }
+      toast('☁ Lien ajouté', 'Les classes de ce professeur sont disponibles.', 'succes');
+      fermer(r);
+    });
+    d.showModal(); d.querySelector('#ajout-lien').focus();
+  });
+};
 window.choisirLienNuage = function () {
   return new Promise((fin) => {
     const d = document.createElement('dialog'); d.className = 'dialogue dlg-nuage';
@@ -626,6 +659,11 @@ window.choisirLienNuage = function () {
     d.showModal(); d.querySelector('#nuage-lien').focus();
   });
 };
+document.getElementById('nuage-autres')?.addEventListener('click', async (ev) => {
+  const b = ev.target.closest('[data-retirer-lien]'); if (!b) return;
+  if (!confirm('Retirer ce lien ? Les classes de ce professeur ne seront plus disponibles sur ce PC.')) return;
+  await api.nuage.retirerLien(b.dataset.retirerLien); majEtatNuage(await api.nuage.etat());
+});
 $('#btn-nuage').addEventListener('click', async () => { if (await window.choisirLienNuage()) { afficherConfig(await api.lireConfig()); } });
 // Clé de l'enseignant : sans elle, impossible de relire les copies chiffrées (nouveau PC, réinstallation)
 function demanderMotDePasse(titre, texte) {

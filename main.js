@@ -131,16 +131,41 @@ const obtenirTrousseau = () => trousseau || (trousseau = creerTrousseau({
   protection: safeStorage.isEncryptionAvailable() ? { chiffrer: (t) => safeStorage.encryptString(t).toString('base64'), dechiffrer: (t) => safeStorage.decryptString(Buffer.from(t, 'base64')) } : null,
 }));
 const obtenirNuage = () => nuage || (nuage = creerNuage({ dossierDonnees: () => app.getPath('userData'), journal: (m) => console.log(m), trousseau: obtenirTrousseau() }));
+// Autres liens Nuage (élève : un lien par enseignant) : un moteur de synchronisation et une copie locale par lien
+const nuagesSupp = new Map(); // jeton → moteur
+const miroirDeLien = (lien) => { const a = analyserLien(lien); return a ? path.join(app.getPath('userData'), 'nuage', a.jeton) : null; };
+const miroirNuage = (c) => (c && c.nuage ? miroirDeLien(c.nuage.lien) : null);
+const liensSupp = (c) => { const p = c && c.nuage && analyserLien(c.nuage.lien); const vus = new Set(p ? [p.jeton] : []);
+  return (Array.isArray(c && c.nuagesSupp) ? c.nuagesSupp : []).filter((x) => { const a = x && analyserLien(x.lien); if (!a || vus.has(a.jeton)) return false; vus.add(a.jeton); return true; }); };
+function demarrerNuagesSupp() {
+  const voulus = new Map(liensSupp(lireConfigBrute()).map((x) => [analyserLien(x.lien).jeton, x]));
+  for (const [j, m] of nuagesSupp) if (!voulus.has(j)) { m.arreter(); nuagesSupp.delete(j); }
+  for (const [j, x] of voulus) {
+    if (nuagesSupp.has(j)) continue;
+    const m = creerNuage({ dossierDonnees: () => app.getPath('userData'), journal: (t) => console.log(t), trousseau: obtenirTrousseau() });
+    m.surChangement((e) => { if (fenetre && !fenetre.isDestroyed()) fenetre.webContents.send('nuage:etat', { ...obtenirNuage().infos(), supp: [...nuagesSupp.values()].map((y) => y.infos()) }); });
+    nuagesSupp.set(j, m); m.demarrer(x);
+  }
+}
+const tousLesNuages = () => [...(nuage && nuage.infos().actif ? [nuage] : []), ...nuagesSupp.values()];
 // publie la clé publique de l'enseignant ou de l'élève dans le dossier partagé (si Nuage est utilisé)
 function publierCle(id) {
-  try { const m = miroirNuage(lireConfigBrute()); if (m) { obtenirTrousseau().publier(m, id); if (nuage) nuage.synchroniser(); } } catch (e) { console.log('clé : ' + e.message); }
+  try {
+    const c = lireConfigBrute(), e = /^eleve:([^:]+):/.exec(id);
+    const miroirs = [miroirNuage(c), ...liensSupp(c).map((x) => miroirDeLien(x.lien))].filter(Boolean);
+    // la clé d'un élève va dans le dossier où se trouve sa classe ; celle de l'enseignant, dans son dossier
+    const m = e ? miroirs.find((x) => fs.existsSync(path.join(x, 'Classes', e[1]))) : miroirs[0];
+    if (m) { obtenirTrousseau().publier(m, id); tousLesNuages().forEach((n) => n.synchroniser()); }
+  } catch (err) { console.log('clé : ' + err.message); }
 }
-const miroirNuage = (c) => { const a = c && c.nuage && analyserLien(c.nuage.lien); return a ? path.join(app.getPath('userData'), 'nuage', a.jeton) : null; };
 function lireConfig() {
   const c = lireConfigBrute();
   const m = miroirNuage(c);
-  if (m) { try { fs.mkdirSync(m, { recursive: true }); } catch { /* disque */ } return { ...c, dossierMaj: m, nuage: { lien: c.nuage.lien } }; } // le mot de passe ne sort pas
-  return c;
+  const supp = liensSupp(c).map((x) => miroirDeLien(x.lien));
+  supp.forEach((x) => { try { fs.mkdirSync(x, { recursive: true }); } catch { /* disque */ } });
+  const plus = { dossiersSupp: supp, nuagesSupp: liensSupp(c).map((x) => ({ lien: analyserLien(x.lien).lien })) }; // les mots de passe ne sortent pas
+  if (m) { try { fs.mkdirSync(m, { recursive: true }); } catch { /* disque */ } return { ...c, ...plus, dossierMaj: m, nuage: { lien: c.nuage.lien } }; }
+  return { ...c, ...plus };
 }
 
 function ecrireConfig(config) {
@@ -1201,7 +1226,31 @@ function enregistrerIPC() {
     const r = await n.synchroniser();
     return { ...r, ok: true, copie: !!copies, vide: t.vide };
   });
-  ipcMain.handle('nuage:etat', () => ({ ...obtenirNuage().infos(), compteProf: dernierCompteProf, cleProf: !!(dernierCompteProf && obtenirTrousseau().cle('prof:' + dernierCompteProf)) }));
+  // Élève : ajouter le lien Nuage d'un autre enseignant (« ＋ Nouvelle matière »). Sans dossier partagé : il devient le dossier principal.
+  ipcMain.handle('nuage:ajouter-lien', async (_e, lien, mdp) => {
+    const c = lireConfigBrute(), a = analyserLien(lien);
+    if (!a) return { ok: false, message: 'Ce n’est pas un lien de partage Nuage (il ressemble à https://nuage0X.apps.education.fr/s/…).' };
+    if (!miroirNuage(c) && !c.dossierMaj) { // premier lien
+      const t = await obtenirNuage().tester({ lien, mdp }); if (!t.ok) return t;
+      ecrireConfig({ ...c, nuage: { lien: t.lien, mdp: String(mdp || '').slice(0, 200) } });
+      obtenirNuage().demarrer(lireConfigBrute().nuage);
+      return { ...(await obtenirNuage().synchroniser()), ok: true, principal: true };
+    }
+    if ((miroirNuage(c) && analyserLien(c.nuage.lien).jeton === a.jeton) || liensSupp(c).some((x) => analyserLien(x.lien).jeton === a.jeton)) return { ok: false, message: 'Ce lien est déjà enregistré sur ce PC.' };
+    const t = await obtenirNuage().tester({ lien, mdp }); if (!t.ok) return t;
+    ecrireConfig({ ...c, nuagesSupp: [...liensSupp(c), { lien: t.lien, mdp: String(mdp || '').slice(0, 200) }].slice(0, 12) });
+    demarrerNuagesSupp();
+    const m = nuagesSupp.get(a.jeton);
+    return { ...(m ? await m.synchroniser() : {}), ok: true };
+  });
+  ipcMain.handle('nuage:retirer-lien', (_e, lien) => {
+    const a = analyserLien(lien); if (!a) return { ok: false };
+    const c = lireConfigBrute();
+    ecrireConfig({ ...c, nuagesSupp: liensSupp(c).filter((x) => analyserLien(x.lien).jeton !== a.jeton) });
+    demarrerNuagesSupp();
+    return { ok: true };
+  });
+  ipcMain.handle('nuage:etat', () => ({ ...obtenirNuage().infos(), supp: [...nuagesSupp.values()].map((y) => y.infos()), compteProf: dernierCompteProf, cleProf: !!(dernierCompteProf && obtenirTrousseau().cle('prof:' + dernierCompteProf)) }));
   // Sauvegarde / restauration de la clé de l'enseignant (indispensable pour relire les copies sur un nouveau PC)
   ipcMain.handle('nuage:exporter-cle', async (_e, mdp) => {
     if (!dernierCompteProf) return { ok: false, message: 'Ouvre d’abord ton espace professeur (avec ton mot de passe).' };
@@ -1218,7 +1267,7 @@ function enregistrerIPC() {
     try { const id = obtenirTrousseau().importer(fs.readFileSync(choix.filePaths[0], 'utf8'), mdp); publierCle(id); return { ok: true, id }; }
     catch (e) { return { ok: false, message: e.message }; }
   });
-  ipcMain.handle('nuage:synchroniser', () => obtenirNuage().synchroniser());
+  ipcMain.handle('nuage:synchroniser', async () => { const r = await Promise.all(tousLesNuages().map((n) => n.synchroniser())); return r[0] || { ok: false }; });
 
   ipcMain.handle('maj:verifier', () => verifierDossierMaj());
 
@@ -1573,6 +1622,7 @@ if (!app.requestSingleInstanceLock()) {
     // Suivi en direct : le PC du professeur écoute, les PC élèves envoient un signal.
     espace = creerEspaceClasses({
       ipcMain, dialog, obtenirFenetre: () => fenetre, lireConfig, edition: EDITION, pendantDialogue: classe.pendantDialogue,
+      racinesSupp: () => (lireConfig().dossiersSupp || []).map((d) => path.join(d, 'Classes')),
       ouvrirChemin: (p) => shell.openPath(p),
       dossierDocuments, cheminLibre, nomFichierSur, urlPadValide, dossierDonnees: () => app.getPath('userData'),
       surIdentification: (eleve) => { suivi.definirEleve(eleve); majFocus(); if (eleve && eleve.classeId && eleve.eleveId) publierCle(`eleve:${eleve.classeId}:${eleve.eleveId}`); },
@@ -1588,6 +1638,7 @@ if (!app.requestSingleInstanceLock()) {
     enregistrerIPC();
     obtenirNuage().surChangement((e) => { if (fenetre && !fenetre.isDestroyed()) fenetre.webContents.send('nuage:etat', e); });
     if (miroirNuage(lireConfigBrute())) obtenirNuage().demarrer(lireConfigBrute().nuage);
+    demarrerNuagesSupp();
     classe.enregistrerIPC();
     espace.enregistrerIPC();
     suivi.enregistrerIPC();
@@ -1600,9 +1651,10 @@ if (!app.requestSingleInstanceLock()) {
   // Avant de quitter : un dernier envoi vers Nuage (4 s au plus), pour ne pas garder une copie seulement sur ce PC
   let nuageFini = false;
   app.on('before-quit', (e) => {
-    if (nuageFini || !nuage || !nuage.infos().actif) return;
+    if (nuageFini || !tousLesNuages().length) return;
     e.preventDefault(); nuageFini = true;
-    Promise.race([nuage.synchroniser(), new Promise((r) => setTimeout(r, 4000))]).finally(() => { nuage.arreter(); app.quit(); });
+    const liste = tousLesNuages();
+    Promise.race([Promise.all(liste.map((n) => n.synchroniser())), new Promise((r) => setTimeout(r, 4000))]).finally(() => { liste.forEach((n) => n.arreter()); app.quit(); });
   });
 
   app.on('window-all-closed', () => app.quit());

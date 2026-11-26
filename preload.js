@@ -15,6 +15,8 @@ contextBridge.exposeInMainWorld('labo', {
     etat: () => ipcRenderer.invoke('nuage:etat'),
     synchroniser: () => ipcRenderer.invoke('nuage:synchroniser'),
     exporterCle: (mdp) => ipcRenderer.invoke('nuage:exporter-cle', mdp),
+    ajouterLien: (lien, mdp) => ipcRenderer.invoke('nuage:ajouter-lien', lien, mdp),
+    retirerLien: (lien) => ipcRenderer.invoke('nuage:retirer-lien', lien),
     importerCle: (mdp) => ipcRenderer.invoke('nuage:importer-cle', mdp),
     surEtat: (f) => ipcRenderer.on('nuage:etat', (_e, x) => f(x)),
   },

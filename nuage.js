@@ -63,7 +63,7 @@ function creerNuage({ dossierDonnees, journal = () => {}, trousseau = null }) {
       const d = parties.slice(0, k).join('/');
       if (distants.has(d)) continue;
       const r = await requete('MKCOL', d + '/');
-      if (![201, 405].includes(r.status)) throw new Error(`Création du dossier « ${d} » refusée (${r.status}).`);
+      if (![201, 405].includes(r.status)) throw Object.assign(new Error(`Création du dossier « ${d} » refusée (${r.status}).`), { http: r.status });
       distants.set(d, { dossier: true, etag: '', modif: Date.now() });
     }
   }
@@ -86,9 +86,13 @@ function creerNuage({ dossierDonnees, journal = () => {}, trousseau = null }) {
   }
   const local = (rel) => path.join(miroir(), ...rel.split('/'));
 
-  async function telecharger(rel, d, connus) {
+  // un fichier qui pose problème (introuvable, refusé) ne bloque pas les autres : noté, puis réessayé au cycle suivant
+  let problemes = [];
+  const sansBloquer = (f) => async (...a) => { try { return await f(...a); } catch (e) { if (!e.http) throw e; problemes.push(e.message); return undefined; } };
+  const telecharger = sansBloquer(telechargerFichier);
+  async function telechargerFichier(rel, d, connus) {
     const r = await requete('GET', rel, { delai: 120000 });
-    if (r.status !== 200) throw new Error(`Téléchargement de « ${rel} » : ${r.status}.`);
+    if (r.status !== 200) throw Object.assign(new Error(`Téléchargement de « ${rel} » : ${r.status}.`), { http: r.status });
     let octets = Buffer.from(await r.arrayBuffer()), dest;
     if (trousseau && trousseau.estChiffre(octets)) {
       dest = trousseau.destinatairesDe(octets);
@@ -104,7 +108,8 @@ function creerNuage({ dossierDonnees, journal = () => {}, trousseau = null }) {
   }
   // fichier personnel → qui doit pouvoir le lire ? (null : fichier commun, envoyé en clair)
   const voulus = (rel) => (trousseau ? trousseau.destinataires(miroir(), rel) : null);
-  async function envoyer(rel, l, connus, distants) {
+  const envoyer = sansBloquer(envoyerFichier);
+  async function envoyerFichier(rel, l, connus, distants) {
     let corps = fs.readFileSync(local(rel)), dest;
     const v = voulus(rel);
     if (v) {
@@ -113,7 +118,7 @@ function creerNuage({ dossierDonnees, journal = () => {}, trousseau = null }) {
     }
     await creerDossiers(rel, distants);
     const r = await requete('PUT', rel, { corps, entetes: { 'Content-Type': 'application/octet-stream' }, delai: 180000 });
-    if (![200, 201, 204].includes(r.status)) throw new Error(`Envoi de « ${rel} » : ${r.status}${r.status === 403 ? ' (le lien n’autorise pas la modification ?)' : ''}.`);
+    if (![200, 201, 204].includes(r.status)) throw Object.assign(new Error(`Envoi de « ${rel} » : ${r.status}${r.status === 403 ? ' (le lien n’autorise pas la modification ?)' : ''}.`), { http: r.status });
     const etag = (r.headers.get('oc-etag') || r.headers.get('etag') || '').replace(/"/g, '');
     connus[rel] = { etag, mtime: l.mtime, taille: l.taille, ...(dest ? { dest } : {}) };
     etat.envoyes++;
@@ -123,6 +128,7 @@ function creerNuage({ dossierDonnees, journal = () => {}, trousseau = null }) {
   async function cycle() {
     if (!conf) return;
     fs.mkdirSync(miroir(), { recursive: true });
+    problemes = [];
     const memo = lireEtat(); const connus = memo.fichiers || {};
     const locaux = parcourir(miroir());
     const changeLocal = [...locaux].some(([rel, l]) => !l.dossier && (!connus[rel] || connus[rel].mtime !== l.mtime || connus[rel].taille !== l.taille))
@@ -177,6 +183,7 @@ function creerNuage({ dossierDonnees, journal = () => {}, trousseau = null }) {
       if (![200, 201, 204].includes(r.status)) journal(`nuage : liste des suppressions non envoyée (${r.status})`);
     }
     const apres = await lister('0');
+    if (problemes.length) { ecrireEtat({ racine: null, fichiers: connus }); etat.derniere = new Date().toISOString(); etat.horsLigne = false; etat.erreur = `${problemes.length} fichier(s) pas encore synchronisé(s) — nouvel essai bientôt (${problemes[0]})`; journal('nuage : ' + problemes.join(' ; ')); return; }
     ecrireEtat({ racine: (apres.get('') || {}).etag || null, fichiers: connus });
     etat.derniere = new Date().toISOString(); etat.erreur = null; etat.horsLigne = false;
   }

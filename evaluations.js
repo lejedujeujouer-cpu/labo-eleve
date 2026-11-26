@@ -416,7 +416,8 @@ function creerEvaluations({ app, ipcMain, espace, lireConfig, edition, dossierDo
   const lireSession = (sid) => (ID.test(sid || '') ? lireJson(local('sessions', sid + '.json'), null) : null);
   const ecrireSession = (s) => ecrireJson(local('sessions', s.sid + '.json'), s);
   const racine = () => { const d = lireConfig().dossierMaj; return d ? path.join(d, 'Classes') : null; };
-  const partage = (classeId, sid, ...p) => { if (!ID.test(classeId) || !ID.test(sid) || !racine()) throw new Error('Dossier partagé indisponible.'); return path.join(racine(), classeId, 'evaluations', sid, ...p); };
+  const racineDe = (classeId) => (espace && espace.racinePour ? espace.racinePour(classeId) : racine()) || racine(); // la classe peut être dans un autre dossier (élève : plusieurs liens)
+  const partage = (classeId, sid, ...p) => { if (!ID.test(classeId) || !ID.test(sid) || !racine()) throw new Error('Dossier partagé indisponible.'); return path.join(racineDe(classeId), classeId, 'evaluations', sid, ...p); };
   const exigerProf = () => { if (edition !== 'prof' || !espace.estProfDeverrouille()) throw new Error('Réservé à l\'enseignant connecté dans Labo Prof.'); };
   const gerer = (canal, fn) => ipcMain.handle(canal, async (_e, ...a) => {
     try { const r = await fn(...a); return { ok: true, ...(r && typeof r === 'object' && !Array.isArray(r) ? r : { valeur: r }) }; } catch (e) { return { ok: false, message: e.message }; }
@@ -1147,7 +1148,7 @@ function creerEvaluations({ app, ipcMain, espace, lireConfig, edition, dossierDo
     }
     for (const t of travaux) {
       let ret = null;
-      try { ret = lireJson(path.join(racine(), classeId, 'travaux', t.id, 'retours', eleveId + '.json'), null); } catch { /* indisponible */ }
+      try { ret = lireJson(path.join(racineDe(classeId), classeId, 'travaux', t.id, 'retours', eleveId + '.json'), null); } catch { /* indisponible */ }
       if (!ret || !dansPeriode(ret.date, periode)) continue;
       t.questions.forEach((z) => { const v = ((ret.questions || {})[z.id] || {}).v; if (!v || !(z.competence || z.objectif)) return;
         items.push({ cle: `t:${t.id}:${z.id}`, competence: z.competence, objectif: z.objectif, poids: z.points || 1, date: ret.date, ratio: v === 'juste' ? 1 : v === 'partiel' ? partielCourant : 0, titre: `${t.nom} · ${z.nom}` }); });
@@ -1313,7 +1314,7 @@ function creerEvaluations({ app, ipcMain, espace, lireConfig, edition, dossierDo
   gerer('notes:mes-notes', () => {
     const el = espace.eleve && espace.eleve();
     if (!el || !ID.test(el.classeId || '') || !ID.test(el.eleveId || '') || !racine()) return { periodes: {} };
-    return lireJson(path.join(racine(), el.classeId, 'notes', el.eleveId + '.json'), { periodes: {} });
+    return lireJson(path.join(racineDe(el.classeId), el.classeId, 'notes', el.eleveId + '.json'), { periodes: {} });
   });
 
   // =====================================================================================
@@ -1326,7 +1327,7 @@ function creerEvaluations({ app, ipcMain, espace, lireConfig, edition, dossierDo
   // =====================================================================================
   const lireModules = () => lireJson(local('modules.json'), { modules: [] }).modules || [];
   const ecrireModules = (m) => ecrireJson(local('modules.json'), { modules: m });
-  const dossierEntr = (classeId, ...p) => { if (!ID.test(classeId || '') || !racine()) throw new Error('Dossier partagé indisponible.'); return path.join(racine(), classeId, 'entrainement', ...p); };
+  const dossierEntr = (classeId, ...p) => { if (!ID.test(classeId || '') || !racine()) throw new Error('Dossier partagé indisponible.'); return path.join(racineDe(classeId), classeId, 'entrainement', ...p); };
   gerer('entr:modules', () => { exigerProf(); return { modules: lireModules() }; });
   gerer('entr:module-enregistrer', (d = {}) => {
     exigerProf();

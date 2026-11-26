@@ -303,3 +303,7 @@ svg { stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; 
 .dlg-nuage input[type=url], .dlg-nuage input[type=password] { padding: 9px 11px; border: 1px solid var(--bord); border-radius: 10px; font: inherit; background: var(--surface-2); color: var(--texte); }
 .dlg-nuage .aide.erreur { color: #b45309; }
 .dlg-nuage .rangee { display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px; }
+
+.nuage-autres { margin: 0 0 10px; font-size: 13px; }
+.nuage-autres .nuage-lien { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 4px 0; border-bottom: 1px solid var(--bord); }
+.ajout-lien { display: flex; flex-direction: column; align-items: center; gap: 6px; margin: 22px auto 0; text-align: center; color: var(--texte-doux); font-size: 13px; }

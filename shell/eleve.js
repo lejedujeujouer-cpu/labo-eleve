@@ -136,8 +136,12 @@
     boutonAnnees();
     $('#btn-eleve-retour').textContent = '← Retour à mes matières';
     $('#btn-eleve-retour').onclick = () => (cartesMatieres().length > 1 || !etat.eleve ? afficherMatieres() : entrer(etat.eleve, etat.eleve.matiere));
+    // un professeur qui utilise un autre dossier Nuage : l'élève colle son lien, ses classes apparaissent
+    const ajoutLien = window.ajouterLienNuage ? '<div class="ajout-lien"><button type="button" class="secondaire" id="btn-ajout-lien">☁ Ajouter le lien Nuage d’un autre professeur</button><span>Ta classe n’est pas dans la liste ? Ton professeur t’a peut-être donné un lien Nuage.</span></div>' : '';
+    const brancherAjout = () => $('#btn-ajout-lien')?.addEventListener('click', async () => { if (await window.ajouterLienNuage()) afficherIdentification(); });
     if (!proposees.length) {
-      $('#eleve-choix').innerHTML = '<p class="vide">Aucune autre classe pour l\'instant. Ton professeur doit d\'abord créer sa classe dans Labo Prof.</p>';
+      $('#eleve-choix').innerHTML = '<p class="vide">Aucune autre classe pour l\'instant. Ton professeur doit d\'abord créer sa classe dans Labo Prof.</p>' + ajoutLien;
+      brancherAjout();
       return;
     }
     $('#eleve-choix').innerHTML = `<div class="rangee-niveaux">${proposees.map((c, i) => {
@@ -149,6 +153,7 @@
         <span class="nom-niveau">${echapper([liste.map((x) => infoMatiere(x).nom).join(' + '), c.prof].filter(Boolean).join(' · ') || nomNiveau(c.niveau) || 'Classe')}</span>
         <span class="nb">${pluriel(c.eleves.length, 'élève')}</span></button>`;
     }).join('')}</div>`;
+    $('#eleve-choix').insertAdjacentHTML('beforeend', ajoutLien); brancherAjout();
     $('#eleve-choix').querySelectorAll('[data-classe]').forEach((b) => b.addEventListener('click', () => afficherNoms(classes.find((c) => c.id === b.dataset.classe))));
   }
 

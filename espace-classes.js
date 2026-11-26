@@ -53,13 +53,17 @@ const matiereNoeud = (c, n) => (n && n.matiere && (c.matieres || []).includes(n.
 const couleurValide = (c) => (/^#[0-9a-f]{6}$/i.test(String(c || '')) ? c : null);
 const iconeValide = (i) => { const t = String(i || '').trim(); return t && [...t].length <= 4 && !/[<>&"']/.test(t) ? t : null; };
 
-function creerEspaceClasses({ ipcMain, dialog, obtenirFenetre, lireConfig, pendantDialogue, dossierDocuments, cheminLibre, nomFichierSur, urlPadValide, dossierDonnees, surIdentification = () => {}, surDeverrouillage = () => {}, surVerrouillage = () => {}, surLiberation = () => {}, surExamenLeve = () => {}, surExamenLocal = () => {}, ouvrirChemin = () => {}, edition = 'prof' }) {
+function creerEspaceClasses({ ipcMain, dialog, obtenirFenetre, lireConfig, pendantDialogue, dossierDocuments, cheminLibre, nomFichierSur, urlPadValide, dossierDonnees, surIdentification = () => {}, surDeverrouillage = () => {}, surVerrouillage = () => {}, surLiberation = () => {}, surExamenLeve = () => {}, surExamenLocal = () => {}, ouvrirChemin = () => {}, edition = 'prof', racinesSupp = () => [] }) {
   const MESSAGE_ELEVE = "L'espace professeur se trouve dans l'application Labo Prof, installée sur l'ordinateur de l'enseignant.";
   let profConnecte = null; // id du compte enseignant connecté (Labo Prof)
   let eleveActuel = null;  // inscription active de l'élève : { classeId, classe, matiere, prof, profId, eleveId, nom }
 
   const racine = () => { const d = lireConfig().dossierMaj; return d ? path.join(d, 'Classes') : null; };
-  const dossierClasse = (id) => path.join(racine(), id);
+  // Élève : ses classes peuvent venir de plusieurs dossiers (un lien Nuage par enseignant). Chaque classe est cherchée
+  // dans le dossier principal puis dans les autres ; une nouvelle classe (enseignant) va dans le dossier principal.
+  const toutesRacines = () => [racine(), ...(edition === 'eleve' ? racinesSupp() : [])].filter(Boolean);
+  const racinePour = (id) => { const rs = toutesRacines(); if (rs.length > 1 && id) for (const r of rs) { if (fs.existsSync(path.join(r, id))) return r; } return racine(); };
+  const dossierClasse = (id) => path.join(racinePour(id), id);
   const fichierClasse = (id) => path.join(dossierClasse(id), 'classe.json');
   const nouvelId = (texte) => {
     const base = String(texte || 'x').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'x';
@@ -78,8 +82,10 @@ function creerEspaceClasses({ ipcMain, dialog, obtenirFenetre, lireConfig, penda
   // ---------- Comptes enseignants ----------
   const fichierComptes = () => path.join(racine(), 'professeurs.json');
   const fichierAncienMdp = () => path.join(racine(), 'professeur.json');
-  function lireComptes() {
-    if (!racine()) return [];
+  // comptes enseignants d'un dossier (par défaut : le dossier principal)
+  function lireComptes(r = racine()) {
+    if (!r) return [];
+    if (r !== racine()) { const d = lireJson(path.join(r, 'professeurs.json'), null); return d && Array.isArray(d.comptes) ? d.comptes : []; }
     const d = lireJson(fichierComptes(), null);
     if (d && Array.isArray(d.comptes)) return d.comptes;
     // Ancienne version : un seul mot de passe pour tout l'espace professeur → devient un compte « à compléter ».
@@ -94,13 +100,15 @@ function creerEspaceClasses({ ipcMain, dialog, obtenirFenetre, lireConfig, penda
   // Le propriétaire et les collègues qu'il a invités gèrent la classe (élèves, thèmes, travaux, examen, suivi).
   const enseignantsDe = (classe) => [proprietaire(classe), ...(classe.coEnseignants || [])];
   const peutGerer = (classe, profId) => !!profId && enseignantsDe(classe).includes(profId);
+  // une classe d'un autre dossier : ses enseignants sont dans le professeurs.json de ce dossier
+  const comptesDeLaClasse = (classe, comptes) => { const r = classe && classe.id ? racinePour(classe.id) : racine(); return r && r !== racine() ? lireComptes(r) : (comptes || lireComptes()); };
   const nomsCoEnseignants = (classe, comptes = null) => {
-    const liste = comptes || lireComptes();
+    const liste = comptesDeLaClasse(classe, comptes);
     if (!liste.length && Array.isArray(classe.coNoms)) return classe.coNoms; // PC élève hors ligne
     return (classe.coEnseignants || []).map((id) => (liste.find((c) => c.id === id) || {}).nom).filter(Boolean);
   };
   const nomsProfs = (classe, comptes = null) => [nomProf(classe, comptes), ...nomsCoEnseignants(classe, comptes)].filter(Boolean).join(' et ') || null;
-  const nomProf = (classe, comptes = null) => classe.profNom || ((comptes || lireComptes()).find((c) => c.id === proprietaire(classe)) || {}).nom || null;
+  const nomProf = (classe, comptes = null) => classe.profNom || (comptesDeLaClasse(classe, comptes).find((c) => c.id === proprietaire(classe)) || {}).nom || null;
 
   // ---------- Identité de l'élève sur ce PC (inscriptions) ----------
   // Chaque nom choisi est mémorisé sur l'ordinateur : l'élève est reconnecté automatiquement et ne peut plus
@@ -198,11 +206,16 @@ function creerEspaceClasses({ ipcMain, dialog, obtenirFenetre, lireConfig, penda
   }
 
   function listerClasses() {
-    const r = racine();
-    if (!r || !fs.existsSync(r)) return [];
-    return fs.readdirSync(r, { withFileTypes: true })
-      .filter((e) => e.isDirectory() && ID.test(e.name))
-      .map((e) => lireJson(path.join(r, e.name, 'classe.json'), null))
+    const vues = new Set(), liste = [];
+    for (const r of toutesRacines()) {
+      if (!fs.existsSync(r)) continue;
+      for (const e of fs.readdirSync(r, { withFileTypes: true })) {
+        if (!e.isDirectory() || !ID.test(e.name) || vues.has(e.name)) continue;
+        const c = lireJson(path.join(r, e.name, 'classe.json'), null);
+        if (c && c.id && c.nom) { vues.add(e.name); liste.push(c); }
+      }
+    }
+    return liste
       .filter((c) => c && c.id && c.nom)
       .map(normaliserClasse)
       .sort((a, b) => a.nom.localeCompare(b.nom, 'fr', { numeric: true }));
@@ -1127,7 +1140,7 @@ function creerEspaceClasses({ ipcMain, dialog, obtenirFenetre, lireConfig, penda
   }
 
   return {
-    enregistrerIPC, hotesPadsClasses, racine, verifierMotDePasse, copierPourLeProf, infoEnvoiProf, lireClasse, listerClasses, oublierIdentite, oublierInscription, activer, examenEleve,
+    enregistrerIPC, hotesPadsClasses, racine, racinePour, verifierMotDePasse, copierPourLeProf, infoEnvoiProf, lireClasse, listerClasses, oublierIdentite, oublierInscription, activer, examenEleve,
     eleve: () => eleveActuel,
     modifierClasse,
     estProfDeverrouille: () => !!profConnecte,
